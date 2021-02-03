@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Feb  2 20:40:56 2021
-
-@author: jkcle
-"""
 import numpy as np
 
 class KNN:
@@ -17,7 +11,7 @@ class KNN:
         # Check that weights is either 'uniform' or 'distance'.
         assert ((weights == "uniform") 
                 | (weights 
-                   == "distance")), "weights should be 'uniform' or 'distance'."
+                   == "distance")), "weights must be 'uniform' or 'distance'."
         
         # Initialize the k, which is the number of nearest neighbors.
         self.k = k
@@ -93,17 +87,19 @@ class KNN:
         
         return
     
-    def predict(self, array, smoothing=0):
+    def predict(self, array, smoothing=0, probability=False):
         """This method predicts the label for each row in an array of new
         observations by applying the _predict_one method to each row. The
         smoothing factor is set to 0, but can be increased if divide by 0
-        warnings are encountered."""
+        warnings are encountered. The probability argument is only used
+        if passed as true to the KNNClassifier class."""
         
         # If there is only one observation in the new array, use the
         # _predict_one method to calculate a prediction.
         if len(self._X[0].shape) == len(array.shape):
             predictions = self._predict_one(array, 
-                                            smoothing=smoothing)
+                                            smoothing=smoothing,
+                                            probability=probability)
         
         else:
             # Check that the input array has the same number of columns as X.
@@ -117,7 +113,8 @@ class KNN:
             predictions = np.apply_along_axis(self._predict_one,
                                               axis=1, 
                                               arr=array, 
-                                              smoothing=smoothing)
+                                              smoothing=smoothing,
+                                              probability=probability)
         # Return the predictions.
         return predictions
 
@@ -126,7 +123,7 @@ class KNNClassifier(KNN):
     """This class is the child class of the KNN class that is performs
     KNN classification."""
     
-    def _predict_one(self, array, smoothing):
+    def _predict_one(self, array, smoothing, probability):
         """This method predicts the label for a single observation and
         is applied to the rows of an input array in the predict method
         to predict multiple observations."""
@@ -155,23 +152,36 @@ class KNNClassifier(KNN):
         label_set = np.unique(k_nearest_labels)
         # Create an empty list to hold the weighted vote tallys
         weighted_vote_tally = []
-            
+        # Create a dictionary to hold the probabilities of belonging to each 
+        # class.
+        prob_dict = dict()
+        
         # For each label in the k nearest points...
         for label in label_set:
             # Create a binary mask to select the weights associated with the 
             # label.
             temp_indexes = k_nearest_labels==label
-            # Sum the weights associated with the label and append it to the 
+            # Sum the weights associated with the label and append it to the
             # list.
-            weighted_vote_tally.append(np.sum(my_weights[temp_indexes]))
+            weighted_vote = np.sum(my_weights[temp_indexes])
+            weighted_vote_tally.append(weighted_vote)
+            # Create a key from the label and make the value the weighted vote 
+            # share.
+            prob_dict[label] = weighted_vote / np.sum(my_weights)
         
         # Find the index of highest number of votes in weighted_vote_tally.
         most_likely_class_index = np.argmax(weighted_vote_tally)
         # Use that index to grab the label with the highest vote share.
         label = label_set[most_likely_class_index]
-            
-        # Return the label.
-        return label
+        
+        # If the user wants probabilities, return the dictionary.
+        if probability == True:
+            return prob_dict
+        # If the user doesn't want predicted classes, return the predicted 
+        # label.
+        else:
+            # Return the label.
+            return label
 
     
 class KNNRegresser(KNN):
