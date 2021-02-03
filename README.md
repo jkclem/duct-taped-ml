@@ -14,11 +14,19 @@ Once it is more fully developed, I will turn it into a package and upload it to 
 
 ## Future Functionality
 * K-Means Clustering
-* Linear Regression (OLS and LAD)
-* Regularized Linear Regression (LASSO and Ridge)
+* Linear Regression
+  * Ordinary Least Squares
+  * Least Absolute Deviations
+* Regularized Linear Regression
+  * LASSO
+  * Ridge
+  * Elastic Net
 * Logistic Regression
 * Bagging Regresser and Classifier
 * Gradient Boosting Regresser and Classifier
-* Discriminant Analysis (LDA and QDA)
+* Discriminant Analysis
+  * Linear Discriminant Analysis
+  * Quadratic Discriminant Analysis
 * Classification and Regression Trees
 * K-Folds Cross-Validation
+* Support Vector Machine
