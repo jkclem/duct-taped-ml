@@ -94,6 +94,10 @@ class KNN:
         warnings are encountered. The probability argument is only used
         if passed as true to the KNNClassifier class."""
         
+        # Check that the smoothing factor is non-negative.
+        assert ((smoothing >= 0) 
+                & (smoothing < 1)), "0 <= smoothing < 1"
+        
         # If there is only one observation in the new array, use the
         # _predict_one method to calculate a prediction.
         if len(self._X[0].shape) == len(array.shape):
@@ -106,8 +110,6 @@ class KNN:
             assert (array.shape[1] 
                     == self._X.shape[1]), ("Input array must have the same ",
                                            "number of columns as X.")
-            # Check that the smoothing factor is non-negative.
-            assert smoothing >= 0, "smoothing factor must be non-negative."
             
             # Apply the _predict_one method to each row in the input array.
             predictions = np.apply_along_axis(self._predict_one,
