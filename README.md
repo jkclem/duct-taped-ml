@@ -13,7 +13,7 @@ Once it is more fully developed, I will turn it into a package and upload it to 
 * KNN Regresser and Classifier
 
 ## Future Functionality
-* K-Means
+* K-Means Clustering
 * Linear Regression (OLS and LAD)
 * Regularized Linear Regression (LASSO and Ridge)
 * Logistic Regression
