@@ -11,7 +11,7 @@ class KNN:
         # Check that weights is either 'uniform' or 'distance'.
         assert ((weights == "uniform") 
                 | (weights 
-                   == "distance")), "weights must be 'uniform' or 'distance'."
+                   == "distance")), "weights should be 'uniform' or 'distance'."
         
         # Initialize the k, which is the number of nearest neighbors.
         self.k = k
@@ -161,7 +161,7 @@ class KNNClassifier(KNN):
             # Create a binary mask to select the weights associated with the 
             # label.
             temp_indexes = k_nearest_labels==label
-            # Sum the weights associated with the label and append it to the
+            # Sum the weights associated with the label and append it to the 
             # list.
             weighted_vote = np.sum(my_weights[temp_indexes])
             weighted_vote_tally.append(weighted_vote)
@@ -188,10 +188,13 @@ class KNNRegresser(KNN):
     """This class is the child class of the KNN class that is performs
     KNN regression."""
     
-    def _predict_one(self, array, smoothing):
+    def _predict_one(self, array, smoothing, probability):
         """This method predicts the label for a single observation and
         is applied to the rows of an input array in the predict method
-        to predict multiple observations."""
+        to predict multiple observations. The probability argument has 
+        nothing to do with the KNNRegresser. It is only included to 
+        allow the KNN parent class to have a predict method that can
+        be used with the two child classes, making maintenance easier."""
         
         # Retrieve the indices of the k nearest observations to the new
         # data point.
