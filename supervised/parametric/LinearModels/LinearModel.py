@@ -7,14 +7,30 @@ Created on Thu Feb 11 18:41:49 2021
 import numpy as np
 
 class LinearModel():
-    """"""
+    """The Linear Model Class is the parent class to linear models."""
+    
     def __init__(self, add_coefficient=True):
+        """
+        Parameters
+        ----------
+        add_coefficient : bool, optional
+            Tells the class if it needs to add a column of 1s in the first
+            column of any data set passed to it, for fitting or prediction. If
+            the user does not want to include an intercept in the model, or 
+            has already included a column of 1s in the data set for the 
+            intercept, this should be set to False. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
         self.add_coefficient = add_coefficient
         self.beta_hat = None
+        return
     
     def predict(self, X):
-        """
-        This function predicts the response values of the input array, X, in 
+        """This function predicts the response values of the input array, X, in 
         the scale the model is estimated in; e.g. a logistic model will return
         predictions in log-odds. The columns of X must match the number of 
         columns on the array on which the model was fit. The ordering must be
@@ -47,4 +63,5 @@ class LinearModel():
         # Forget X to free memory.
         del X
         
+        # Return the predictions.
         return np.matmul(X_copy, self.beta_hat)
