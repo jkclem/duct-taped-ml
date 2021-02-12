@@ -7,10 +7,15 @@ Created on Thu Feb 11 18:41:49 2021
 import numpy as np
 
 class LinearModel():
-    """The Linear Model Class is the parent class to linear models."""
+    """The Linear Model Class is the parent class to all linear models."""
     
     def __init__(self, add_coefficient=True):
         """
+        Initializes the class with a boolean indicating whether or not the
+        class needs to add a column of 1s to all feature matrices to fit an
+        intercept and an empty beta_hat vector that will hold the regression
+        model's coefficients.
+        
         Parameters
         ----------
         add_coefficient : bool, optional
@@ -72,3 +77,15 @@ class LinearModel():
         
         # Return the predictions.
         return np.matmul(X_copy, self.beta_hat)
+    
+class LinearRegression(LinearModel):
+    """This class serves as the parent class to the OLS, LAD, LASSO, Ridge, 
+    and Elastic Net regression classes."""
+    
+    def __init__(self, add_coefficient):
+        self.add_coefficient = add_coefficient
+        self.beta_hat = None
+        self._TSS = None
+        self._RSS = None
+        self.R_sq = None
+        return
