@@ -29,8 +29,15 @@ class LinearModel():
         self.beta_hat = None
         return
     
+    def fit():
+        """This method will be overwritten by each of its child classes 
+        because the method of fitting the linear model will vary from
+        algorithm to algorithm.
+        """
+        pass
+    
     def predict(self, X):
-        """This function predicts the response values of the input array, X, in 
+        """This method predicts the response values of the input array, X, in 
         the scale the model is estimated in; e.g. a logistic model will return
         predictions in log-odds. The columns of X must match the number of 
         columns on the array on which the model was fit. The ordering must be
