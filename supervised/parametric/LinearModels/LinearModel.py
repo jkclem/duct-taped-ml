@@ -153,6 +153,7 @@ class OLS(LinearRegression):
         self.F_stat = None
         self.F_prob = None
         self.beta_hat_se = None
+        self.beta_hat_t_stats = None
         self.adj_R_sq = None
         self.sigma_hat = None
         super(OLS, self).__init__(*args, **kwargs)
@@ -328,34 +329,19 @@ class OLS(LinearRegression):
         self.F_prob = 1. - f.cdf(self.F_stat, self.df_model, self.df_error)
         
         # Calculate the standard errors of the beta_hat coefficients.
+        # First calculate the pseudo-inverse of XtX forcing all values to be
+        # positive.
         XtX = np.matmul(np.transpose(X_copy), X_copy)
         XtX_pinv = np.absolute(np.linalg.pinv(XtX))
+        # Calculate the standard errors of the coefficients.
         self.beta_hat_se = np.diagonal(np.sqrt(self.sigma_hat**2 * XtX_pinv))
+        
+        # Calculate the t-statitistics of the estimated coefficients.
+        self.beta_hat_t_stats = self.beta_hat / self.beta_hat_se
         
         return
 
-size = 100
-np.random.seed(1)
-X1 = np.random.normal(loc=0, scale=1, size=size)       
-X2 = np.random.normal(loc=0, scale=1, size=size)   
-X3 = np.random.normal(loc=0, scale=1, size=size) 
-X = np.concatenate([X1, X2, X3]).reshape(size, 3)
-y = 1 + 2*X[:,0] + 3*X[:,1] + 4*X[:,2] + np.random.normal(loc=0, scale=1, 
-                                                          size=size)
-my_ols = OLS()
-my_ols.fit(X, y, method="moore-penrose")        
-        
-import statsmodels.api as sm
 
-# Create an array of 1s equal in length to the observations in X.
-intercept_column = np.repeat(1, repeats=X.shape[0])
-# Insert it at the 0-th column index.
-X_copy = np.insert(X, 0, intercept_column, axis=1)
-        
-        
-sm_model = sm.OLS(y, X_copy).fit()
-print(sm_model.summary())       
-        
         
         
         
