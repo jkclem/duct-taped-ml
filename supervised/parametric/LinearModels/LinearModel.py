@@ -266,6 +266,11 @@ class OLS(LinearRegression):
     def _fit_svd(self, X, y):
         """Estimates the coefficients of the OLS model using Singular Value
         Decomposition.
+        
+        Used the following link as a guide:
+            
+        https://andreask.cs.illinois.edu/cs357-s15/public/demos/
+        09-svd-applications/Least%20Squares%20using%20the%20SVD.html
 
         Parameters
         ----------
