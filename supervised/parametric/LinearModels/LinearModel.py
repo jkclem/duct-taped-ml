@@ -113,5 +113,10 @@ class LinearRegression(LinearModel):
         return
    
     def _calculate_R_sq(self):
+        # Define a method to calculate the R-squared of the model.
         self.R_sq = 1 - self._RSS / self._TSS
         return
+    
+class OLS(LinearRegression):
+    def __init__(self, *args, **kwargs):
+        super(OLS, self).__init__(*args, **kwargs)
