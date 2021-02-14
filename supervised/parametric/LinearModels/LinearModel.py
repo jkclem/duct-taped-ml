@@ -133,6 +133,7 @@ class OLS(LinearRegression):
         self._TSS = np.sum((y - np.mean(y))**2)
         y_hat = self.predict(X)
         self._RSS = np.sum((y - y_hat)**2)
+        self.R_sq = 1 - self._TSS / self._RSS
         
         return
         
