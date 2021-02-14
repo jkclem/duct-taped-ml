@@ -120,6 +120,8 @@ class LinearRegression(LinearModel):
         return
     
 class OLS(LinearRegression):
+    """This class is used for performing OLS regression."""
+    
     def __init__(self, *args, **kwargs):
         self.adj_R_sq = None
         super(OLS, self).__init__(*args, **kwargs)
