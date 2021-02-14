@@ -157,10 +157,14 @@ class OLS(LinearRegression):
         # Forget X to free up memory.
         del X
         
+        # Fit the model coefficients using QR factorization if the user wants.
         if method == "qr":
             self._fit_qr(X_copy, y)
+        # Fit the model coefficients using the Moore-Penrose psuedo-inverse of
+        # XtX^-1 if the user wants.
         elif method == "moore-penrose inverse":
             self._fit_pinv(X_copy, y)
+        # Fit the model coefficients using SVD if the user wants.
         else:
             self._fit_svd(X_copy, y)
         
