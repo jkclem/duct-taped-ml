@@ -91,7 +91,7 @@ class LinearRegression(LinearModel):
         intercept and an empty beta_hat vector that will hold the regression
         model's coefficients. Initialized attributes for the corrected total
         sum of squares and residual sum of squares that will be used to 
-        calculate the R-squared and adjusted R-squared attributes.
+        calculate the R-squared attribute.
         
         Parameters
         ----------
@@ -123,6 +123,28 @@ class OLS(LinearRegression):
     """This class is used for performing OLS regression."""
     
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the class with a boolean indicating whether or not the
+        class needs to add a column of 1s to all feature matrices to fit an
+        intercept and an empty beta_hat vector that will hold the regression
+        model's coefficients. Initialized attributes for the corrected total
+        sum of squares and residual sum of squares that will be used to 
+        calculate the R-squared and adjusted R-squared attributes.
+        
+        Parameters
+        ----------
+        add_intercept : bool, optional
+            Tells the class if it needs to add a column of 1s in the first
+            column of any data set passed to it, for fitting or prediction. If
+            the user does not want to include an intercept in the model, or 
+            has already included a column of 1s in the data set for the 
+            intercept, this should be set to False. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
         self.adj_R_sq = None
         super(OLS, self).__init__(*args, **kwargs)
         return
