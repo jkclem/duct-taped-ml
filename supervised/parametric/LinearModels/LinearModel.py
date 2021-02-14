@@ -154,8 +154,6 @@ class OLS(LinearRegression):
         # Create a copy of X that has a column for the intercept if the user
         # wants one.
         X_copy = self._add_intercept(X)
-        # Forget X to free up memory.
-        del X
         
         # Fit the model coefficients using QR factorization if the user wants.
         if method == "qr":
@@ -168,8 +166,9 @@ class OLS(LinearRegression):
         else:
             self._fit_svd(X_copy, y)
         
+        # Calculate the corrected total sum of squares.
         self._TSS = np.sum((y - np.mean(y))**2)
-        y_hat = self.predict(X_copy)
+        y_hat = self.predict(X)
         self._RSS = np.sum((y - y_hat)**2)
         self.R_sq = 1 - self._TSS / self._RSS
         self.adj_R_sq = (1 
