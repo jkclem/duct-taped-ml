@@ -235,6 +235,32 @@ class OLS(LinearRegression):
         self.beta_hat = np.linalg.solve(R, z)
         
         return
+    
+    def _fit_pinv(self, X, y):
+        """Estimates the coefficients of the OLS model using the normal 
+        equation, but substituting the Moore-Penrose pseudo-inverse of XtX^-1 
+        instead of directly calculating XtX^-1.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+
+        Returns
+        -------
+        None.
+
+        """
+        XtX = np.matmul(np.transpose(X), X)
+        XtX_pinv = np.linalg.pinv(XtX)
+        XtX_pinv_Xt = np.matmul(XtX_pinv, np.transpose(X)) 
+        self.beta_hat = np.matmul(XtX_pinv_Xt, y)
+        
+        return
 
 size = 100
 np.random.seed(1)
