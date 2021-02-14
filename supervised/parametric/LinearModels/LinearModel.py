@@ -195,7 +195,8 @@ class OLS(LinearRegression):
         # Calculate the predicted training values to calculate the RSS.
         y_hat = self.predict(X)
         # Calculate the residual sum of squares (RSS).
-        self._RSS = np.sum((y - y_hat)**2)
+        squared_residuals = (y - y_hat)**2
+        self._RSS = np.sum(squared_residuals)
         # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._TSS / self._RSS
         # Calculate the adjusted R-squares, which adjusts the R-square by 
