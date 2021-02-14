@@ -129,7 +129,9 @@ class OLS(LinearRegression):
             self._fit_pinv(X, y)
         else:
             self._fit_svd(X, y)
-            
+        
+        self._TSS = np.mean(y - np.mean(y))**2
+        
         return
         
         
