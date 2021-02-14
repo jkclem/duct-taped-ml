@@ -120,3 +120,32 @@ class LinearRegression(LinearModel):
 class OLS(LinearRegression):
     def __init__(self, *args, **kwargs):
         super(OLS, self).__init__(*args, **kwargs)
+        return
+    
+    def fit(self, X, y, method="qr"):
+        if method == "qr":
+            self._fit_qr(X, y)
+        elif method == "moore-penrose inverse":
+            self._fit_pinv(X, y)
+        else:
+            self._fit_svd(X, y)
+            
+        return
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
