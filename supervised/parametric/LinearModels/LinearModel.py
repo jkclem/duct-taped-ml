@@ -166,10 +166,13 @@ class OLS(LinearRegression):
         else:
             self._fit_svd(X_copy, y)
         
-        # Calculate the corrected total sum of squares.
+        # Calculate the corrected total sum of squares (TSS).
         self._TSS = np.sum((y - np.mean(y))**2)
+        # Calculate the predicted training values to calculate the RSS.
         y_hat = self.predict(X)
+        # Calculate the residual sum of squares (RSS).
         self._RSS = np.sum((y - y_hat)**2)
+        # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._TSS / self._RSS
         self.adj_R_sq = (1 
                          - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
