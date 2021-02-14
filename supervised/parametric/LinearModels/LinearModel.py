@@ -121,6 +121,7 @@ class LinearRegression(LinearModel):
     
 class OLS(LinearRegression):
     def __init__(self, *args, **kwargs):
+        self.adj_R_sq = None
         super(OLS, self).__init__(*args, **kwargs)
         return
     
@@ -139,7 +140,9 @@ class OLS(LinearRegression):
         y_hat = self.predict(X_copy)
         self._RSS = np.sum((y - y_hat)**2)
         self.R_sq = 1 - self._TSS / self._RSS
-        
+        self.adj_R_sq = (1 
+                         - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
+                         /(X_copy.shape[0] - X_copy.shape[1]))
         return
         
         
