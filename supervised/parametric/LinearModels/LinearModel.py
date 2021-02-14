@@ -125,15 +125,18 @@ class OLS(LinearRegression):
         return
     
     def fit(self, X, y, method="qr"):
+        
+        X_copy = self._add_intercept(X)
+        
         if method == "qr":
-            self._fit_qr(X, y)
+            self._fit_qr(X_copy, y)
         elif method == "moore-penrose inverse":
-            self._fit_pinv(X, y)
+            self._fit_pinv(X_copy, y)
         else:
-            self._fit_svd(X, y)
+            self._fit_svd(X_copy, y)
         
         self._TSS = np.sum((y - np.mean(y))**2)
-        y_hat = self.predict(X)
+        y_hat = self.predict(X_copy)
         self._RSS = np.sum((y - y_hat)**2)
         self.R_sq = 1 - self._TSS / self._RSS
         
