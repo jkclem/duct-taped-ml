@@ -184,29 +184,15 @@ class OLS(LinearRegression):
             self._fit_qr(X_copy, y)
         # Fit the model coefficients using the Moore-Penrose psuedo-inverse of
         # XtX^-1 if the user wants.
-        elif method == "moore-penrose inverse":
+        elif method == "moore-penrose":
             self._fit_pinv(X_copy, y)
         # Fit the model coefficients using SVD if the user wants.
         else:
             self._fit_svd(X_copy, y)
         
-        # Calculate the corrected total sum of squares (TSS).
-        self._TSS = np.sum((y - np.mean(y))**2)
-        # Calculate the predicted training values to calculate the RSS.
-        y_hat = self.predict(X)
-        # Calculate the residual sum of squares (RSS).
-        self._RSS = np.sum((y - y_hat)**2)
-        # Calculate the R-squared of the fit model.
-        self.R_sq = 1 - self._RSS / self._TSS
-        # Calculate the adjusted R-squares, which adjusts the R-square by 
-        # penalizing the model for having variables which don't lower the
-        # R-squared.
-        self.adj_R_sq = (1 
-                         - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
-                         /(X_copy.shape[0] - X_copy.shape[1]))
-        # Estimate the sigma (standard deviation) of the response y.
-        self.sigma_hat = np.sqrt(self._RSS 
-                                 / (X_copy.shape[0] - X_copy.shape[1]))
+        # Calculate model statistics.
+        self._calculate_model_stats(X, y)
+        
         return
     
     def _fit_qr(self, X, y):
@@ -261,6 +247,34 @@ class OLS(LinearRegression):
         self.beta_hat = np.matmul(XtX_pinv_Xt, y)
         
         return
+    
+    def _calculate_model_stats(self, X, y):
+        
+        # Create a copy of X with an intercept column inserted at the 
+        # beginning if the user desired it. 
+        X_copy = self._add_intercept(X)
+        
+        # Calculate the corrected total sum of squares (TSS).
+        self._TSS = np.sum((y - np.mean(y))**2)
+        
+        # Calculate the residual sum of squares (RSS).
+        self._RSS = np.sum((y - self.predict(X))**2)
+        
+        # Calculate the R-squared of the fit model.
+        self.R_sq = 1 - self._RSS / self._TSS
+        
+        # Calculate the adjusted R-squares, which adjusts the R-square by 
+        # penalizing the model for having variables which don't lower the
+        # R-squared.
+        self.adj_R_sq = (1 
+                         - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
+                         /(X_copy.shape[0] - X_copy.shape[1]))
+        
+        # Estimate the sigma (standard deviation) of the response y.
+        self.sigma_hat = np.sqrt(self._RSS 
+                                 / (X_copy.shape[0] - X_copy.shape[1]))
+        
+        return
 
 size = 100
 np.random.seed(1)
@@ -271,8 +285,7 @@ X = np.concatenate([X1, X2, X3]).reshape(size, 3)
 y = 1 + 2*X[:,0] + 3*X[:,1] + 4*X[:,2] + np.random.normal(loc=0, scale=1, 
                                                           size=size)
 my_ols = OLS()
-my_ols.fit(X, y)                                                          
-        
+my_ols.fit(X, y, method="moore-penrose")        
         
         
         
