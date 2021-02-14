@@ -111,6 +111,7 @@ class LinearRegression(LinearModel):
         self.beta_hat = None
         self._TSS = None
         self._RSS = None
+        self._MSS = None
         self.R_sq = None
         return
    
@@ -145,6 +146,8 @@ class OLS(LinearRegression):
         None.
 
         """
+        self.df_model = None
+        self.df_error = None
         self.adj_R_sq = None
         self.sigma_hat = None
         super(OLS, self).__init__(*args, **kwargs)
@@ -255,14 +258,18 @@ class OLS(LinearRegression):
         X_copy = self._add_intercept(X)
         
         # Calculate the corrected total sum of squares (TSS).
-        self._TSS = np.sum((y - np.mean(y))**2)
-        
+        self._TSS = np.sum((y - np.mean(y))**2)       
         # Calculate the residual sum of squares (RSS).
         self._RSS = np.sum((y - self.predict(X))**2)
+        # Calculate the model sum of squares (MSS).
+        self._MSS = self._TSS - self._RSS
+        
+        # Estimate the sigma (standard deviation) of the response y.
+        self.sigma_hat = np.sqrt(self._RSS 
+                                 / (X_copy.shape[0] - X_copy.shape[1]))
         
         # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._RSS / self._TSS
-        
         # Calculate the adjusted R-squares, which adjusts the R-square by 
         # penalizing the model for having variables which don't lower the
         # R-squared.
@@ -270,10 +277,17 @@ class OLS(LinearRegression):
                          - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
                          /(X_copy.shape[0] - X_copy.shape[1]))
         
-        # Estimate the sigma (standard deviation) of the response y.
-        self.sigma_hat = np.sqrt(self._RSS 
-                                 / (X_copy.shape[0] - X_copy.shape[1]))
+        # If the first column is all 1s for an intercept term, the degrees of
+        # freedom of the model is the number of columns - 1.
+        if sum(X[:,0] == 1) == X.shape[0]:
+            self.df_model = X_copy.shape[1] - 1
+        # If there is an intercept column, the degrees of freedom of the model
+        # is the number of columns.
+        else:
+            self.df_model = X_copy.shape[1]
         
+        # Set the degrees of freedom of the error attribute for the model.
+        self.df_error =  X_copy.shape[0] -  X_copy.shape[1]
         return
 
 size = 100
