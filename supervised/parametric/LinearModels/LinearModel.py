@@ -197,7 +197,7 @@ class OLS(LinearRegression):
         # Calculate the residual sum of squares (RSS).
         self._RSS = np.sum((y - y_hat)**2)
         # Calculate the R-squared of the fit model.
-        self.R_sq = 1 - self._TSS / self._RSS
+        self.R_sq = 1 - self._RSS / self._TSS
         # Calculate the adjusted R-squares, which adjusts the R-square by 
         # penalizing the model for having variables which don't lower the
         # R-squared.
@@ -210,15 +210,16 @@ class OLS(LinearRegression):
         return
     
     def _fit_qr(self, X, y):
-        """
-        
+        """Estimates the coefficients of the OLS model using QR factorization.
 
         Parameters
         ----------
-        X : TYPE
-            DESCRIPTION.
-        y : TYPE
-            DESCRIPTION.
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
 
         Returns
         -------
@@ -234,11 +235,17 @@ class OLS(LinearRegression):
         self.beta_hat = np.linalg.solve(R, z)
         
         return
-        
-        
-        
-        
-        
+
+size = 100
+np.random.seed(1)
+X1 = np.random.normal(loc=0, scale=1, size=size)       
+X2 = np.random.normal(loc=0, scale=1, size=size)   
+X3 = np.random.normal(loc=0, scale=1, size=size) 
+X = np.concatenate([X1, X2, X3]).reshape(size, 3)
+y = 1 + 2*X[:,0] + 3*X[:,1] + 4*X[:,2] + np.random.normal(loc=0, scale=1, 
+                                                          size=size)
+my_ols = OLS()
+my_ols.fit(X, y)                                                          
         
         
         
