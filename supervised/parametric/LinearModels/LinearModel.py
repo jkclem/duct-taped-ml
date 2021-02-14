@@ -150,6 +150,26 @@ class OLS(LinearRegression):
         return
     
     def fit(self, X, y, method="qr"):
+        """
+        
+
+        Parameters
+        ----------
+        X : TYPE
+            DESCRIPTION.
+        y : TYPE
+            DESCRIPTION.
+        method : str, optional
+            Decides how the OLS fit is estimated. The OLS coefficients can be
+            estimated by either using QR factorization ("qr"), the 
+            Moore-Penrose  pseudo-inverse of XtX^-1 ("moore-penrose"), or 
+            Singular Value Decomposition "svd". The default is "qr".
+
+        Returns
+        -------
+        None.
+
+        """
         
         # Create a copy of X that has a column for the intercept if the user
         # wants one.
