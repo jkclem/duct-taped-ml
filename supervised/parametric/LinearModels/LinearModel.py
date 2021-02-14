@@ -119,7 +119,9 @@ class LinearRegression(LinearModel):
         # Define a method to calculate the R-squared of the model.
         self.R_sq = 1 - self._RSS / self._TSS
         return
-    
+
+# Import the f distribution from scipy.stats
+from scipy.stats import f
 class OLS(LinearRegression):
     """This class is used for performing OLS regression."""
     
@@ -148,6 +150,9 @@ class OLS(LinearRegression):
         """
         self.df_model = None
         self.df_error = None
+        self.F_stat = None
+        self.F_prob = None
+        self.beta_hat_se = None
         self.adj_R_sq = None
         self.sigma_hat = None
         super(OLS, self).__init__(*args, **kwargs)
@@ -215,6 +220,7 @@ class OLS(LinearRegression):
         None.
 
         """
+        
         # Factorize X into Q, an orthonormal matrix, and R, an upper 
         # triangular matrix, such that X = QR.
         Q, R = np.linalg.qr(X)
@@ -244,10 +250,37 @@ class OLS(LinearRegression):
         None.
 
         """
+        
+        # Calculate XtX.
         XtX = np.matmul(np.transpose(X), X)
+        # Calculate the Moore-Penrose pseudo-inverse of XtX.
         XtX_pinv = np.linalg.pinv(XtX)
-        XtX_pinv_Xt = np.matmul(XtX_pinv, np.transpose(X)) 
-        self.beta_hat = np.matmul(XtX_pinv_Xt, y)
+        # Calculate the hat (aka projection matrix).
+        hat_matrix = np.matmul(XtX_pinv, np.transpose(X)) 
+        self.beta_hat = np.matmul(hat_matrix, y)
+        
+        return 
+    
+    def _fit_svd(self, X, y):
+        """Estimates the coefficients of the OLS model using Singular Value
+        Decomposition.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        
         
         return
     
@@ -279,7 +312,7 @@ class OLS(LinearRegression):
         
         # If the first column is all 1s for an intercept term, the degrees of
         # freedom of the model is the number of columns - 1.
-        if sum(X[:,0] == 1) == X.shape[0]:
+        if sum(X_copy[:,0] == 1.) == X_copy.shape[0]:
             self.df_model = X_copy.shape[1] - 1
         # If there is an intercept column, the degrees of freedom of the model
         # is the number of columns.
@@ -288,6 +321,17 @@ class OLS(LinearRegression):
         
         # Set the degrees of freedom of the error attribute for the model.
         self.df_error =  X_copy.shape[0] -  X_copy.shape[1]
+        
+        # Calculate the F-statistic for overall significance.
+        self.F_stat = (self._MSS / self.df_model)/(self._RSS / self.df_error)
+        # Calculate P(F-statistic) for overall significance.
+        self.F_prob = 1. - f.cdf(self.F_stat, self.df_model, self.df_error)
+        
+        # Calculate the standard errors of the beta_hat coefficients.
+        XtX = np.matmul(np.transpose(X_copy), X_copy)
+        XtX_pinv = np.absolute(np.linalg.pinv(XtX))
+        self.beta_hat_se = np.diagonal(np.sqrt(self.sigma_hat**2 * XtX_pinv))
+        
         return
 
 size = 100
@@ -301,10 +345,16 @@ y = 1 + 2*X[:,0] + 3*X[:,1] + 4*X[:,2] + np.random.normal(loc=0, scale=1,
 my_ols = OLS()
 my_ols.fit(X, y, method="moore-penrose")        
         
+import statsmodels.api as sm
+
+# Create an array of 1s equal in length to the observations in X.
+intercept_column = np.repeat(1, repeats=X.shape[0])
+# Insert it at the 0-th column index.
+X_copy = np.insert(X, 0, intercept_column, axis=1)
         
         
-        
-        
+sm_model = sm.OLS(y, X_copy).fit()
+print(sm_model.summary())       
         
         
         
