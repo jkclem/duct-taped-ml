@@ -62,6 +62,12 @@ class LinearModel():
 
         """
         
+        X_copy = self._add_intercept(X)
+        
+        # Return the predictions.
+        return np.matmul(X_copy, self.beta_hat)
+    
+    def _add_intercept(self, X):
         # If this object needs to add an intercept to new data, add one.
         if self.add_coefficient == True:
             # Create an array of 1s equal in length to the observations in X.
@@ -72,11 +78,7 @@ class LinearModel():
         else:
             X_copy = X
         
-        # Forget X to free memory.
-        del X
-        
-        # Return the predictions.
-        return np.matmul(X_copy, self.beta_hat)
+        return X_copy
     
 class LinearRegression(LinearModel):
     """This class serves as the parent class to the OLS, LAD, LASSO, Ridge, 
