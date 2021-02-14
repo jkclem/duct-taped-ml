@@ -204,6 +204,7 @@ class OLS(LinearRegression):
         self.adj_R_sq = (1 
                          - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
                          /(X_copy.shape[0] - X_copy.shape[1]))
+        self.sigma_hat = np.sqrt(self._RSS / (X_copy.shape[0] - X_copy.shape[1]))
         return
         
         
