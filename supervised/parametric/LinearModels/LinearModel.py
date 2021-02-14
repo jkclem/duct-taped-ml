@@ -174,6 +174,9 @@ class OLS(LinearRegression):
         self._RSS = np.sum((y - y_hat)**2)
         # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._TSS / self._RSS
+        # Calculate the adjusted R-squares, which adjusts the R-square by 
+        # penalizing the model for having variables which don't lower the
+        # R-squared.
         self.adj_R_sq = (1 
                          - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
                          /(X_copy.shape[0] - X_copy.shape[1]))
