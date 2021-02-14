@@ -151,7 +151,11 @@ class OLS(LinearRegression):
     
     def fit(self, X, y, method="qr"):
         
+        # Create a copy of X that has a column for the intercept if the user
+        # wants one.
         X_copy = self._add_intercept(X)
+        # Forget X to free up memory.
+        del X
         
         if method == "qr":
             self._fit_qr(X_copy, y)
