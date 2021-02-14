@@ -282,7 +282,24 @@ class OLS(LinearRegression):
 
         """
         
-        
+        # Decompose X into U, sigma, and Vt
+        U, sigma, Vt = np.linalg.svd(X)
+        # Create a matrix with the dimensions of X of all zeros to make into
+        # the Sigma matrix.
+        Sigma = np.zeros(X.shape)
+        # Overwrite the zeros in the top m x m square of the Sigma matrix with
+        # a m x m diagonal matrix where the sigma values are the diagonal.
+        Sigma[:X.shape[1],:X.shape[1]] = np.diag(sigma)
+        # Create a m x n matrix of zeros that will become the pseudo-inverse 
+        # of Sigma.
+        Sigma_pinv = np.transpose(np.zeros(X.shape))
+        # Overwrite a m x m square at the begininning of the Sigma_pinv matrix
+        # with the m x m diagonal matrix where the diagonals are the inverse 
+        # of the sigma elements.
+        Sigma_pinv[:X.shape[1],:X.shape[1]] = np.diag(1/sigma)
+        # Set the beta_hat attribute to the estimated coefficients.
+        self.beta_hat = np.transpose(Vt).dot(Sigma_pinv).dot(
+            np.transpose(U)).dot(y)
         
         return
     
