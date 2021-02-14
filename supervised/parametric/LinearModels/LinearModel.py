@@ -4,6 +4,8 @@ Created on Thu Feb 11 18:41:49 2021
 
 @author: jkcle
 """
+# Import the f distribution from scipy.stats
+from scipy.stats import f, t
 import numpy as np
 
 class LinearModel():
@@ -120,8 +122,7 @@ class LinearRegression(LinearModel):
         self.R_sq = 1 - self._RSS / self._TSS
         return
 
-# Import the f distribution from scipy.stats
-from scipy.stats import f
+
 class OLS(LinearRegression):
     """This class is used for performing OLS regression."""
     
@@ -149,7 +150,7 @@ class OLS(LinearRegression):
 
         """
         self.df_model = None
-        self.df_error = None
+        self.df_residuals = None
         self.F_stat = None
         self.F_prob = None
         self.beta_hat_se = None
@@ -321,12 +322,13 @@ class OLS(LinearRegression):
             self.df_model = X_copy.shape[1]
         
         # Set the degrees of freedom of the error attribute for the model.
-        self.df_error =  X_copy.shape[0] -  X_copy.shape[1]
+        self.df_residuals =  X_copy.shape[0] -  X_copy.shape[1]
         
         # Calculate the F-statistic for overall significance.
-        self.F_stat = (self._MSS / self.df_model)/(self._RSS / self.df_error)
+        self.F_stat = (self._MSS / self.df_model)/(self._RSS 
+                                                   / self.df_residuals)
         # Calculate P(F-statistic) for overall significance.
-        self.F_prob = 1. - f.cdf(self.F_stat, self.df_model, self.df_error)
+        self.F_prob = 1. - f.cdf(self.F_stat, self.df_model, self.df_residuals)
         
         # Calculate the standard errors of the beta_hat coefficients.
         # First calculate the pseudo-inverse of XtX forcing all values to be
@@ -338,6 +340,11 @@ class OLS(LinearRegression):
         
         # Calculate the t-statitistics of the estimated coefficients.
         self.beta_hat_t_stats = self.beta_hat / self.beta_hat_se
+        
+        # Calculate the P(|t-stats| > 0) for the coefficients.
+        self.beta_hat_prob = (1 
+                              - t.cdf(np.absolute(self.beta_hat_t_stats), 
+                                      df=self.df_residuals))*2
         
         return
 
