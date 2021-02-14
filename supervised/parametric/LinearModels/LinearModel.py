@@ -253,12 +253,9 @@ class OLS(LinearRegression):
 
         """
         
-        # Calculate XtX.
-        XtX = np.matmul(np.transpose(X), X)
-        # Calculate the Moore-Penrose pseudo-inverse of XtX.
-        XtX_pinv = np.linalg.pinv(XtX)
         # Calculate the hat (aka projection matrix).
-        hat_matrix = np.matmul(XtX_pinv, np.transpose(X)) 
+        hat_matrix = np.linalg.pinv(X)
+        # Set the beta_hat attribute with the OLS estimates of beta.
         self.beta_hat = np.matmul(hat_matrix, y)
         
         return 
