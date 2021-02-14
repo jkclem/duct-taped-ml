@@ -151,14 +151,17 @@ class OLS(LinearRegression):
     
     def fit(self, X, y, method="qr"):
         """
-        
+        This method estimates to coefficients of the OLS model and calculates
+        the attributes that describe the fit of the model.
 
         Parameters
         ----------
-        X : TYPE
-            DESCRIPTION.
-        y : TYPE
-            DESCRIPTION.
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
         method : str, optional
             Decides how the OLS fit is estimated. The OLS coefficients can be
             estimated by either using QR factorization ("qr"), the 
