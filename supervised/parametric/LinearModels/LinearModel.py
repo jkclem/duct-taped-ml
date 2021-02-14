@@ -9,7 +9,7 @@ import numpy as np
 class LinearModel():
     """The Linear Model Class is the parent class to all linear models."""
     
-    def __init__(self, add_coefficient=True):
+    def __init__(self, add_intercept=True):
         """
         Initializes the class with a boolean indicating whether or not the
         class needs to add a column of 1s to all feature matrices to fit an
@@ -18,7 +18,7 @@ class LinearModel():
         
         Parameters
         ----------
-        add_coefficient : bool, optional
+        add_intercept : bool, optional
             Tells the class if it needs to add a column of 1s in the first
             column of any data set passed to it, for fitting or prediction. If
             the user does not want to include an intercept in the model, or 
@@ -30,7 +30,7 @@ class LinearModel():
         None.
 
         """
-        self.add_coefficient = add_coefficient
+        self.add_intercept = add_intercept
         self.beta_hat = None
         return
     
@@ -69,7 +69,7 @@ class LinearModel():
     
     def _add_intercept(self, X):
         # If this object needs to add an intercept to new data, add one.
-        if self.add_coefficient == True:
+        if self.add_intercept == True:
             # Create an array of 1s equal in length to the observations in X.
             intercept_column = np.repeat(1, repeats=X.shape[0])
             # Insert it at the 0-th column index.
@@ -84,7 +84,7 @@ class LinearRegression(LinearModel):
     """This class serves as the parent class to the OLS, LAD, LASSO, Ridge, 
     and Elastic Net regression classes."""
     
-    def __init__(self, add_coefficient):
+    def __init__(self, add_intercept=True):
         """
         Initializes the class with a boolean indicating whether or not the
         class needs to add a column of 1s to all feature matrices to fit an
@@ -95,7 +95,7 @@ class LinearRegression(LinearModel):
         
         Parameters
         ----------
-        add_coefficient : bool, optional
+        add_intercept : bool, optional
             Tells the class if it needs to add a column of 1s in the first
             column of any data set passed to it, for fitting or prediction. If
             the user does not want to include an intercept in the model, or 
@@ -107,7 +107,7 @@ class LinearRegression(LinearModel):
         None.
 
         """
-        self.add_coefficient = add_coefficient
+        self.add_intercept = add_intercept
         self.beta_hat = None
         self._TSS = None
         self._RSS = None
