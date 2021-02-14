@@ -130,7 +130,9 @@ class OLS(LinearRegression):
         else:
             self._fit_svd(X, y)
         
-        self._TSS = np.mean(y - np.mean(y))**2
+        self._TSS = np.sum((y - np.mean(y))**2)
+        y_hat = self.predict(X)
+        #self._RSS = np.sum()
         
         return
         
