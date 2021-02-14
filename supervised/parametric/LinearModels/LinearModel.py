@@ -146,6 +146,7 @@ class OLS(LinearRegression):
 
         """
         self.adj_R_sq = None
+        self.sigma_hat = None
         super(OLS, self).__init__(*args, **kwargs)
         return
     
