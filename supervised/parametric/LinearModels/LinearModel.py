@@ -210,9 +210,29 @@ class OLS(LinearRegression):
         return
     
     def _fit_qr(self, X, y):
+        """
+        
+
+        Parameters
+        ----------
+        X : TYPE
+            DESCRIPTION.
+        y : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        # Factorize X into Q, an orthonormal matrix, and R, an upper 
+        # triangular matrix, such that X = QR.
         Q, R = np.linalg.qr(X)
+        # Multiply the transpose of Q and y.
         z = np.matmul(np.transpose(Q), y)
+        # Set the beta_hat attribute as the estimate of beta vector.
         self.beta_hat = np.linalg.solve(R, z)
+        
         return
         
         
