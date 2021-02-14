@@ -204,9 +204,16 @@ class OLS(LinearRegression):
         self.adj_R_sq = (1 
                          - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
                          /(X_copy.shape[0] - X_copy.shape[1]))
-        self.sigma_hat = np.sqrt(self._RSS / (X_copy.shape[0] - X_copy.shape[1]))
+        # Estimate the sigma (standard deviation) of the response y.
+        self.sigma_hat = np.sqrt(self._RSS 
+                                 / (X_copy.shape[0] - X_copy.shape[1]))
         return
-        
+    
+    def _fit_qr(self, X, y):
+        Q, R = np.linalg.qr(X)
+        z = np.matmul(np.transpose(Q), y)
+        self.beta_hat = np.linalg.solve(R, z)
+        return
         
         
         
