@@ -76,7 +76,27 @@ class KNN:
         return
     
     def _euclidean_distances(self, array, k_nearest_indices=None):
-        """"""
+        """This method calculates the Euclidean distance between an array
+        and the data points in X if k_nearest_indices is NoneType. If an array
+        of indices are passed to the function by the _predict_one method, it
+        calculates the distances for just those observations. This is done for
+        inverse-distance weighting.
+
+        Parameters
+        ----------
+        array : numpy ndarray
+            The features of a new observation in an order matching the 
+            training X data.
+        k_nearest_indices : None or numpy ndarray, optional
+            Either None or an array of the indices for the k-nearest neighbors
+            in X to the new observation. The default is None.
+
+        Returns
+        -------
+        euclidean_distances : numpy ndarray
+            DESCRIPTION.
+
+        """
         
         # If an array of indices is not passed, calculate the Euclidean
         # distance between the input array and the entire training data
