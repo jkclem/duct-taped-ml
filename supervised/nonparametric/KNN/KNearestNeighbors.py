@@ -11,10 +11,14 @@ class KNN:
 
         Parameters
         ----------
-        k : TYPE
-            DESCRIPTION.
-        weights : TYPE, optional
-            DESCRIPTION. The default is "uniform".
+        k : int
+            k is a positive integer and the number of nearest neighbors to use
+            for predicting the label of a new observation.
+        weights : str, optional
+            This parameter sets how to weight the labels of the k-nearest 
+            neighbors. Options are "uniform" for equal weighting, or 
+            "distance" for inverse-distance weighting. The default is 
+            "uniform".
 
         Returns
         -------
