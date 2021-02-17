@@ -16,8 +16,8 @@ class KNN:
         weights : str, optional
             This parameter sets how to weight the labels of the k-nearest 
             neighbors. Options are "uniform" for equal weighting, or 
-            "distance" for inverse-distance weighting. The default is 
-            "uniform".
+            "distance" for inverse-distance weighting. 
+            The default is "uniform".
 
         Returns
         -------
@@ -89,7 +89,8 @@ class KNN:
             the training X data.
         k_nearest_indices : None or numpy ndarray, optional
             Either None or an array of the indices for the k-nearest neighbors
-            in X to the new observation. The default is None.
+            in X to the new observation. 
+            The default is None.
 
         Returns
         -------
@@ -159,7 +160,28 @@ class KNN:
         observations by applying the _predict_one method to each row. The
         smoothing factor is set to 0, but can be increased if divide by 0
         warnings are encountered. The probability argument is only used
-        if passed as true to the KNNClassifier class."""
+        if passed as true to the KNNClassifier class.
+        
+
+        Parameters
+        ----------
+        array : numpy ndarray
+            A matrix where the columns are the features of new observations in 
+            an order matching the training X data.
+        smoothing : float, optional
+            A small non-negative number less than 1 added to the denominator
+            for inverse-distance weights to prevent divide by 0 warnings. 
+            The default is 0.
+        probability : TYPE, optional
+            DESCRIPTION. 
+            The default is False.
+
+        Returns
+        -------
+        predictions : TYPE
+            DESCRIPTION.
+
+        """
         
         # Check that the smoothing factor is non-negative.
         assert ((smoothing >= 0) 
