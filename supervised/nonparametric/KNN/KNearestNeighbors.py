@@ -5,8 +5,7 @@ class KNN:
     KNNRegresser classes."""
     
     def __init__(self, k, weights="uniform"):
-        """
-        Initialize the KNN class with a k and weighting option ("uniform", or
+        """Initialize the KNN class with a k and weighting option ("uniform", or
         "distance").
 
         Parameters
@@ -43,16 +42,16 @@ class KNN:
         self._y = None
         
     def fit(self, X, y):
-        """
-        This method saves the training data so it can be used to make 
+        """This method saves the training data so it can be used to make 
         predictions for new data.
 
         Parameters
         ----------
-        X : TYPE
-            DESCRIPTION.
-        y : TYPE
-            DESCRIPTION.
+        X : numpy ndarray
+            A n x m matrix containing the features used to predict y.
+        y : numpy ndarray
+            A numpy array of shape (n, ) of the labels of the observations in
+            X.
 
         Returns
         -------
@@ -77,8 +76,7 @@ class KNN:
         return
     
     def _euclidean_distances(self, array, k_nearest_indices=None):
-        """This method calculates the Euclidean distance between an array
-        and the data points in a matrix."""
+        """"""
         
         # If an array of indices is not passed, calculate the Euclidean
         # distance between the input array and the entire training data
