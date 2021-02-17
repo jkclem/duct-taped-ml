@@ -5,6 +5,21 @@ class KNN:
     KNNRegresser classes."""
     
     def __init__(self, k, weights="uniform"):
+        """
+        
+
+        Parameters
+        ----------
+        k : TYPE
+            DESCRIPTION.
+        weights : TYPE, optional
+            DESCRIPTION. The default is "uniform".
+
+        Returns
+        -------
+        None.
+
+        """
         
         # Check that k is a positive integer.
         assert (type(k) == int) & (k > 0), "k should be a positive integer."
