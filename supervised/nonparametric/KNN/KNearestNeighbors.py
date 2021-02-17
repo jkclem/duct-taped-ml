@@ -94,7 +94,7 @@ class KNN:
         Returns
         -------
         euclidean_distances : numpy ndarray
-            DESCRIPTION.
+            An array of the euclidean distances from the input array.
 
         """
         
