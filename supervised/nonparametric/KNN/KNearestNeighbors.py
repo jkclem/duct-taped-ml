@@ -6,7 +6,8 @@ class KNN:
     
     def __init__(self, k, weights="uniform"):
         """
-        
+        Initialize the KNN class with a k and weighting option ("uniform", or
+        "distance").
 
         Parameters
         ----------
