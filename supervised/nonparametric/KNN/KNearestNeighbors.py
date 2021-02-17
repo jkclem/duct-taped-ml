@@ -172,8 +172,10 @@ class KNN:
             A small non-negative number less than 1 added to the denominator
             for inverse-distance weights to prevent divide by 0 warnings. 
             The default is 0.
-        probability : TYPE, optional
-            DESCRIPTION. 
+        probability : bool, optional
+            Does nothing for the KNNRegresser class. If true for the 
+            KNNClassifier, it returns a dict of the non-zero probabilities for
+            the classes.
             The default is False.
 
         Returns
