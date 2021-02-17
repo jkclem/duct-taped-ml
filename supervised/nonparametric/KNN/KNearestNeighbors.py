@@ -43,8 +43,22 @@ class KNN:
         self._y = None
         
     def fit(self, X, y):
-        """This method saves the training data so it can be used to make 
-        predictions for new data."""
+        """
+        This method saves the training data so it can be used to make 
+        predictions for new data.
+
+        Parameters
+        ----------
+        X : TYPE
+            DESCRIPTION.
+        y : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         
         # Check that X and y are numpy arrays.
         assert ((type(X) == np.ndarray) 
