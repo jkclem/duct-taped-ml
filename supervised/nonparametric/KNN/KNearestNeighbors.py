@@ -85,8 +85,8 @@ class KNN:
         Parameters
         ----------
         array : numpy ndarray
-            The features of a new observation in an order matching the 
-            training X data.
+            An array of the features of a new observation in an order matching 
+            the training X data.
         k_nearest_indices : None or numpy ndarray, optional
             Either None or an array of the indices for the k-nearest neighbors
             in X to the new observation. The default is None.
@@ -116,7 +116,22 @@ class KNN:
     
     def _k_nearest_indices(self, array):
         """This method takes in an array and finds the indices of the k 
-        nearest data points in the training data."""
+        nearest data points in the training data by Euclidean distance.
+        
+
+        Parameters
+        ----------
+        array : numpy ndarray
+            An array of the features of a new observation in an order matching 
+            the training X data.
+
+        Returns
+        -------
+        k_nearest_indices : numpy ndarray
+            A array of shape (k, ) of the indices of the k-nearest neighbors 
+            to the new observation.
+
+        """
         
         # Calculate the Euclidean distances between the new data point and 
         # the training data.
