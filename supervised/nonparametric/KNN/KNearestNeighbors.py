@@ -217,9 +217,25 @@ class KNNClassifier(KNN):
     KNN classification."""
     
     def _predict_one(self, array, smoothing, probability):
-        """This method predicts the label for a single observation and
+        """
+        This method predicts the label for a single observation and
         is applied to the rows of an input array in the predict method
-        to predict multiple observations."""
+        to predict multiple observations.
+
+        array : numpy ndarray
+            A matrix where the columns are the features of new observations in 
+            an order matching the training X data.
+        smoothing : float, optional
+            A small non-negative number less than 1 added to the denominator
+            for inverse-distance weights to prevent divide by 0 warnings. 
+            The default is 0.
+        probability : bool, optional
+            Does nothing for the KNNRegresser class. If true for the 
+            KNNClassifier, it returns a dict of the non-zero probabilities for
+            the classes.
+            The default is False.
+
+        """
         
         # Retrieve the indices of the k nearest observations to the new
         # data point.
