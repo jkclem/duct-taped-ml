@@ -223,18 +223,26 @@ class KNNClassifier(KNN):
         to predict multiple observations.
 
         array : numpy ndarray
-            A matrix where the columns are the features of new observations in 
+            A vector where the columns are the features of new observations in 
             an order matching the training X data.
         smoothing : float, optional
             A small non-negative number less than 1 added to the denominator
             for inverse-distance weights to prevent divide by 0 warnings. 
             The default is 0.
         probability : bool, optional
-            Does nothing for the KNNRegresser class. If true for the 
-            KNNClassifier, it returns a dict of the non-zero probabilities for
-            the classes.
+            If true, it returns a dict of the non-zero probabilities for the
+            classes.
             The default is False.
-
+        
+        Returns
+        -------
+        label : int or str
+            The predicted label for the new observation.
+        prob_dict: dict
+            A dictionary containing the non-zero class membership 
+            probabilities of the new observation. Class labels are keys and
+            their associated probabilities are the values.
+            
         """
         
         # Retrieve the indices of the k nearest observations to the new
