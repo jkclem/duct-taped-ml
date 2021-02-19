@@ -311,7 +311,27 @@ class KNNRegresser(KNN):
         to predict multiple observations. The probability argument has 
         nothing to do with the KNNRegresser. It is only included to 
         allow the KNN parent class to have a predict method that can
-        be used with the two child classes, making maintenance easier."""
+        be used with the two child classes, making maintenance easier.
+        
+        array : numpy ndarray
+            A vector where the columns are the features of new observations in 
+            an order matching the training X data.
+        smoothing : float, optional
+            A small non-negative number less than 1 added to the denominator
+            for inverse-distance weights to prevent divide by 0 warnings. 
+            The default is 0.
+        probability : bool, optional
+            Does nothing for this class. It is only passed to allow the parent
+            class to contain a predict function that works for both the 
+            KNNClassifier and the KNNRegresser.
+            The default is False.
+        
+        Returns
+        -------
+        label : float
+            The predicted value for the new observation.
+        
+        """
         
         # Retrieve the indices of the k nearest observations to the new
         # data point.
