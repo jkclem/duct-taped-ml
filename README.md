@@ -8,12 +8,9 @@ Once it is more fully developed, I will turn it into a package and upload it to 
 
 ## Completed 
 * PCA
-
-## In Progress
 * KNN Regresser and Classifier
 
-## Future Functionality
-* K-Means Clustering
+## In Progress
 * Linear Regression
   * Ordinary Least Squares
   * Least Absolute Deviations
@@ -22,6 +19,9 @@ Once it is more fully developed, I will turn it into a package and upload it to 
   * Ridge
   * Elastic Net
 * Logistic Regression
+
+## Future Functionality
+* K-Means Clustering
 * Bagging Regresser and Classifier
 * Gradient Boosting Regresser and Classifier
 * Discriminant Analysis
