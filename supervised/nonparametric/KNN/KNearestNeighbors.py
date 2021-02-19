@@ -180,8 +180,8 @@ class KNN:
 
         Returns
         -------
-        predictions : TYPE
-            DESCRIPTION.
+        predictions : numpy ndarray
+            The array contains predictions for the new observations.
 
         """
         
