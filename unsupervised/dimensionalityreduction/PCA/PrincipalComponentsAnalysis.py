@@ -64,6 +64,8 @@ class PCA:
 
         """
         
+        assert type(standardize) == bool, "standardize must be True or False"
+        
         # copy the input data
         X_copy = X.copy()
         
