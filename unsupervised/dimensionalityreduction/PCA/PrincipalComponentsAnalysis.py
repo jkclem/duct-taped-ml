@@ -66,51 +66,51 @@ class PCA:
         
         assert type(standardize) == bool, "standardize must be True or False"
         
-        # Copy the input data
+        # Copy the input data.
         X_copy = X.copy()
         
-        # remember the mean and standard deviation for transforming data if 
-        # standardize is True
+        # Remember the mean and standard deviation for transforming data if 
+        # standardize is True.
         self.x_bar = X_copy.mean()
         self.std_dev = X_copy.std()
         
-        # If the data needs standardization, standardize it
+        # If the data needs standardization, standardize it.
         if standardize:
             
-            # remember if input data needs to be standardized
+            # Remember if input data needs to be standardized.
             self.standardize = True
             
-            # de-mean the data
+            # De-mean the data.
             X_copy -= self.x_bar
-            # divide each column by its std dev
+            # Divide each column by its standard deviation.
             X_copy /= self.std_dev
             
-        # Calculate the sample covariance matrix
+        # Calculate the sample covariance matrix.
         S = np.cov(X_copy.T)
         
         # Get the eigenvalues and eigenvectors from the sample covariance 
-        # matrix
+        # matrix.
         eig_vals, eig_vecs = np.linalg.eig(S)
         
-        # Get the sorted indexes of the eigenvalues (largest to smallest)
+        # Get the sorted indexes of the eigenvalues (largest to smallest).
         sorted_indexes = np.argsort(eig_vals)[::-1]
-        # Sort the eigenvalues from largest to smallest
+        # Sort the eigenvalues from largest to smallest.
         eig_vals = eig_vals[sorted_indexes]
-        # Sort the eigenvectors based on their eigen values
+        # Sort the eigenvectors based on their eigen values.
         eig_vecs = eig_vecs[:, sorted_indexes]
         
         # If the data was standardized, total variance is the number of 
-        # variables
+        # variables.
         if standardize:
             total_var = S.shape[0]
             
         # Otherwise use the trace of the sample covariance matrix, aka sum of 
-        # all variances
+        # all variances.
         else:
             total_var = np.trace(S)
             
         # Calculate the percent of variance explained by each principal 
-        # component to 6 decimal places
+        # component to 6 decimal places.
         ratio_var_explained = (eig_vals / total_var).round(6)
         
         # Calculate the cumlative percent of variance explained by each 
