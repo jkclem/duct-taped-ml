@@ -148,18 +148,18 @@ class PCA:
 
         """
         
-        # make sure n_components is a positive integer less than or equal to 
-        # the total number of components
+        # Make sure n_components is a positive integer less than or equal to 
+        # the total number of components.
         assert ((type(n_components) == int) & 
                 (n_components > 0) & 
                 (n_components 
                  <= self.all_components.shape[0])), 'n_components must be a positive integer less than or equal to the number of variables in X'
         
-        # reset the number of components and select n_components
+        # Reset the number of components and select n_components.
         self.n_components = n_components
         self.components = self.all_components[0: self.n_components]
             
-        # end the function
+        # End the function.
         return
     
     def transform(self, X):
