@@ -181,15 +181,15 @@ class PCA:
 
         """
               
-        # copy the input data
+        # Copy the input data.
         X_copy = X.copy()
         
-        # if the data needs standardization, standardize it
+        # If the data needs standardization, standardize it.
         if self.standardize:
-            # de-mean the data
+            # de-mean the data.
             X_copy -= self.x_bar
-            # divide each column by its std dev
+            # Divide each column by its standard deviation.
             X_copy /= self.std_dev
         
-        # returned the transformed data
+        # Returned the transformed data.
         return X_copy @ self.components.T
