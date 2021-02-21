@@ -51,8 +51,9 @@ class PCA:
 
         Parameters
         ----------
-        X : TYPE
-            DESCRIPTION.
+        X : numpy ndarray
+            A n x m matrix where the rows are columns and the columns are
+            features.
         standardize : TYPE, optional
             DESCRIPTION. The default is True.
 
