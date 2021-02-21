@@ -167,7 +167,20 @@ class PCA:
         """Takes in an NumPy array or Pandas DataFrame, standardizes it to 
         have mean 0 and standard deviation 1 if the user desires, and returns 
         the transformed data set based on the rotation matrix with 
-        n_components principal components."""
+        n_components principal components.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are columns and the columns are
+            features.
+
+        Returns
+        -------
+        numpy ndarray
+            The data set transformed by PCA.
+
+        """
               
         # copy the input data
         X_copy = X.copy()
