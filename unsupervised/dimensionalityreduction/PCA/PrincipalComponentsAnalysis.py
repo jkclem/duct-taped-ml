@@ -54,8 +54,9 @@ class PCA:
         X : numpy ndarray
             A n x m matrix where the rows are columns and the columns are
             features.
-        standardize : TYPE, optional
-            DESCRIPTION. The default is True.
+        standardize : bool, optional
+            If desired, standardize the data prior to performing PCA. 
+            The default is True.
 
         Returns
         -------
