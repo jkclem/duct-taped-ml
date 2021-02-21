@@ -18,8 +18,8 @@ class PCA:
     
     def __init__(self):
         # will hold all of the principal components, with the columns as the 
-        # loading for the ordinal
-        # variables and the rows for the principal components
+        # loading for the ordinal variables and the rows for the principal 
+        # components
         self.all_components = np.empty(0)
         # will hold the n_components number of components
         self.components = np.empty(0)
