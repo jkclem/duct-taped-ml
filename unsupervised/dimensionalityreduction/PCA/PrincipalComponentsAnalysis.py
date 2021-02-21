@@ -135,7 +135,19 @@ class PCA:
     def keep_n_components(self, n_components):
         """Sets the number of components to keep if the user does not want to 
         keep them all and modifies the number components making up the 
-        rotation matrix."""
+        rotation matrix.
+
+        Parameters
+        ----------
+        n_components : int
+            Sets the number of principal components to keep for transforming
+            the data.
+
+        Returns
+        -------
+        None.
+
+        """
         
         # make sure n_components is a positive integer less than or equal to 
         # the total number of components
