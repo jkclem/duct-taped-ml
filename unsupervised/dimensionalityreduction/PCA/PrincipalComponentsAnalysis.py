@@ -66,7 +66,7 @@ class PCA:
         
         assert type(standardize) == bool, "standardize must be True or False"
         
-        # copy the input data
+        # Copy the input data
         X_copy = X.copy()
         
         # remember the mean and standard deviation for transforming data if 
@@ -74,7 +74,7 @@ class PCA:
         self.x_bar = X_copy.mean()
         self.std_dev = X_copy.std()
         
-        # if the data needs standardization, standardize it
+        # If the data needs standardization, standardize it
         if standardize:
             
             # remember if input data needs to be standardized
@@ -85,43 +85,42 @@ class PCA:
             # divide each column by its std dev
             X_copy /= self.std_dev
             
-        # calculate the sample covariance matrix
+        # Calculate the sample covariance matrix
         S = np.cov(X_copy.T)
         
-        # get the eigenvalues and eigenvectors from the sample covariance 
+        # Get the eigenvalues and eigenvectors from the sample covariance 
         # matrix
         eig_vals, eig_vecs = np.linalg.eig(S)
         
-        # get the sorted indexes of the eigenvalues (largest to smallest)
+        # Get the sorted indexes of the eigenvalues (largest to smallest)
         sorted_indexes = np.argsort(eig_vals)[::-1]
-        # sort the eigenvalues from largest to smallest
+        # Sort the eigenvalues from largest to smallest
         eig_vals = eig_vals[sorted_indexes]
-        # sort the eigenvectors based on their eigen values
+        # Sort the eigenvectors based on their eigen values
         eig_vecs = eig_vecs[:, sorted_indexes]
         
-        # if the data was standardized, total variance is the number of 
+        # If the data was standardized, total variance is the number of 
         # variables
         if standardize:
             total_var = S.shape[0]
             
-        # otherwise use the trace of the sample covariance matrix, aka sum of 
+        # Otherwise use the trace of the sample covariance matrix, aka sum of 
         # all variances
         else:
             total_var = np.trace(S)
             
-        # calculate the percent of variance explained by each principal 
+        # Calculate the percent of variance explained by each principal 
         # component to 6 decimal places
         ratio_var_explained = (eig_vals / total_var).round(6)
         
-        # calculate the cumlative  percent of variance explained by each 
-        # principal component to 6 
-        # decimal places
+        # Calculate the cumlative percent of variance explained by each 
+        # principal component.
         cumu_ratio_var_explained = ratio_var_explained.cumsum()
-        # set the last element to 100 because it should be 100, but there is
-        # probably floating point error
+        # Set the last element to 100 because it should be 100, but there is
+        # probably floating point error.
         cumu_ratio_var_explained[-1] = 1
         
-        # now set the attributes with the appropriate values
+        # Now set the attributes with the appropriate values.
         self.all_components = eig_vecs.T
         self.components = eig_vecs.T
         self.variance_explained = eig_vals
@@ -129,7 +128,7 @@ class PCA:
         self.cumulative_ratio_var_explained = cumu_ratio_var_explained
         self.n_components = S.shape[0]
         
-        # end the fit function
+        # End the fit function.
         return
     
     def keep_n_components(self, n_components):
