@@ -17,27 +17,27 @@ class PCA:
     number of components to use for transforming data."""
     
     def __init__(self):
-        # will hold all of the principal components, with the columns as the 
+        # Will hold all of the principal components, with the columns as the 
         # loading for the ordinal variables and the rows for the principal 
-        # components
+        # components.
         self.all_components = np.empty(0)
-        # will hold the n_components number of components
+        # Will hold the n_components number of components.
         self.components = np.empty(0)
-        # will hold a vector of the variance explained by each component
+        # Will hold a vector of the variance explained by each component.
         self.variance_explained = np.empty(0)
         # will hold a vector of the ratio of variance explained to total 
-        # variance by each component
+        # variance by each component.
         self.ratio_var_explained = np.empty(0)
-        # will hold a vector of the cumulative ratio of variance explained to 
-        # total variance by each component
+        # Will hold a vector of the cumulative ratio of variance explained to 
+        # total variance by each component.
         self.cumulative_ratio_var_explained = np.empty(0)
-        # sets the number of principal components in self.components
+        # Sets the number of principal components in self.components .
         self.n_components = 0
-        # will remember the training data's means of each column
+        # Will remember the training data's means of each column.
         self.x_bar = np.empty(0)
-        # will remember the training data's standard deviation of each column
+        # Will remember the training data's standard deviation of each column.
         self.std_dev = np.empty(0)
-        # remember if input data needs to be standardized
+        # Remember if input data needs to be standardized.
         self.standardize = False
         
     def fit(self, X, standardize=True):
