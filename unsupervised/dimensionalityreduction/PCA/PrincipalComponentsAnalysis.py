@@ -47,7 +47,20 @@ class PCA:
         principal component, as well as the ratio of total variance explained 
         by a principal component, and the cumulative ratio of variance 
         explained by each principal component. It saves each of those with 
-        their corresponding attribute of the class."""
+        their corresponding attribute of the class.
+
+        Parameters
+        ----------
+        X : TYPE
+            DESCRIPTION.
+        standardize : TYPE, optional
+            DESCRIPTION. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
         
         # copy the input data
         X_copy = X.copy()
@@ -151,4 +164,4 @@ class PCA:
             X_copy /= self.std_dev
         
         # returned the transformed data
-        return np.matmul(X_copy, self.components.T)
+        return X_copy @ self.components.T
