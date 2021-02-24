@@ -122,7 +122,7 @@ class LinearRegression(LinearModel):
         self.R_sq = 1 - self._RSS / self._TSS
         return
 
-class ClosedFormLinearModel(LinearRegression):
+class ClosedFormLinearModel(LinearModel):
     """This is a parent class to those used for performing OLS and ridge 
     regression."""
     
@@ -149,21 +149,14 @@ class ClosedFormLinearModel(LinearRegression):
         None.
 
         """
-        self.df_model = None
-        self.df_residuals = None
-        self.F_stat = None
-        self.F_prob = None
-        self.beta_hat_se = None
-        self.beta_hat_t_stats = None
-        self.adj_R_sq = None
-        self.sigma_hat = None
-        super(OLS, self).__init__(*args, **kwargs)
+        super(LinearModel, self).__init__(*args, **kwargs)
         return
     
-    def fit(self, X, y, method="qr"):
+    def fit(self, X, y, alpha=0):
         """
-        This method estimates to coefficients of the OLS model and calculates
-        the attributes that describe the fit of the model.
+        This method estimates to coefficients of the OLS or ridge regression 
+        model using singular value decomposition and calculates the attributes 
+        that describe the fit of the model.
 
         Parameters
         ----------
