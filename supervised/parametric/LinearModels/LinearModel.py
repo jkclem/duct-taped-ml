@@ -122,6 +122,251 @@ class LinearRegression(LinearModel):
         self.R_sq = 1 - self._RSS / self._TSS
         return
 
+class ClosedFormLinearModel(LinearRegression):
+    """This is a parent class to those used for performing OLS and ridge 
+    regression."""
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Initializes the class with a boolean indicating whether or not the
+        class needs to add a column of 1s to all feature matrices to fit an
+        intercept and an empty beta_hat vector that will hold the regression
+        model's coefficients. Initialized attributes for the corrected total
+        sum of squares and residual sum of squares that will be used to 
+        calculate the R-squared and adjusted R-squared attributes.
+        
+        Parameters
+        ----------
+        add_intercept : bool, optional
+            Tells the class if it needs to add a column of 1s in the first
+            column of any data set passed to it, for fitting or prediction. If
+            the user does not want to include an intercept in the model, or 
+            has already included a column of 1s in the data set for the 
+            intercept, this should be set to False. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.df_model = None
+        self.df_residuals = None
+        self.F_stat = None
+        self.F_prob = None
+        self.beta_hat_se = None
+        self.beta_hat_t_stats = None
+        self.adj_R_sq = None
+        self.sigma_hat = None
+        super(OLS, self).__init__(*args, **kwargs)
+        return
+    
+    def fit(self, X, y, method="qr"):
+        """
+        This method estimates to coefficients of the OLS model and calculates
+        the attributes that describe the fit of the model.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+        method : str, optional
+            Decides how the OLS fit is estimated. The OLS coefficients can be
+            estimated by either using QR factorization ("qr"), the 
+            Moore-Penrose  pseudo-inverse of XtX^-1 ("moore-penrose"), or 
+            Singular Value Decomposition "svd". The default is "qr".
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        # Create a copy of X that has a column for the intercept if the user
+        # wants one.
+        X_copy = self._add_intercept(X)
+        
+        # Fit the model coefficients using QR factorization if the user wants.
+        if method == "qr":
+            self._fit_qr(X_copy, y)
+        # Fit the model coefficients using the Moore-Penrose psuedo-inverse of
+        # XtX^-1 if the user wants.
+        elif method == "moore-penrose":
+            self._fit_pinv(X_copy, y)
+        # Fit the model coefficients using SVD if the user wants.
+        else:
+            self._fit_svd(X_copy, y)
+        
+        # Calculate model statistics.
+        self._calculate_model_stats(X, y)
+        
+        return
+    
+    def _fit_qr(self, X, y):
+        """Estimates the coefficients of the OLS model using QR factorization.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        # Factorize X into Q, an orthonormal matrix, and R, an upper 
+        # triangular matrix, such that X = QR.
+        Q, R = np.linalg.qr(X)
+        # Multiply the transpose of Q and y.
+        z = np.matmul(np.transpose(Q), y)
+        # Set the beta_hat attribute as the estimate of beta vector.
+        self.beta_hat = np.linalg.solve(R, z)
+        
+        return
+    
+    def _fit_pinv(self, X, y):
+        """Estimates the coefficients of the OLS model using the normal 
+        equation, but substituting the Moore-Penrose pseudo-inverse of XtX^-1 
+        instead of directly calculating XtX^-1.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        # Calculate the hat (aka projection matrix).
+        hat_matrix = np.linalg.pinv(X)
+        # Set the beta_hat attribute with the OLS estimates of beta.
+        self.beta_hat = np.matmul(hat_matrix, y)
+        
+        return 
+    
+    def _fit_svd(self, X, y):
+        """Estimates the coefficients of the OLS model using Singular Value
+        Decomposition.
+        
+        Used the following link as a guide:
+            
+        https://andreask.cs.illinois.edu/cs357-s15/public/demos/
+        09-svd-applications/Least%20Squares%20using%20the%20SVD.html
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        # Decompose X into U, sigma, and Vt
+        U, sigma, Vt = np.linalg.svd(X)
+        # Create a matrix with the dimensions of X of all zeros to make into
+        # the Sigma matrix.
+        Sigma = np.zeros(X.shape)
+        # Overwrite the zeros in the top m x m square of the Sigma matrix with
+        # a m x m diagonal matrix where the sigma values are the diagonal.
+        Sigma[:X.shape[1],:X.shape[1]] = np.diag(sigma)
+        # Create a m x n matrix of zeros that will become the pseudo-inverse 
+        # of Sigma.
+        Sigma_pinv = np.transpose(np.zeros(X.shape))
+        # Overwrite a m x m square at the begininning of the Sigma_pinv matrix
+        # with the m x m diagonal matrix where the diagonals are the inverse 
+        # of the sigma elements.
+        Sigma_pinv[:X.shape[1],:X.shape[1]] = np.diag(1/sigma)
+        # Set the beta_hat attribute to the estimated coefficients.
+        self.beta_hat = np.transpose(Vt).dot(Sigma_pinv).dot(
+            np.transpose(U)).dot(y)
+        
+        return
+    
+    def _calculate_model_stats(self, X, y):
+        
+        # Create a copy of X with an intercept column inserted at the 
+        # beginning if the user desired it. 
+        X_copy = self._add_intercept(X)
+        
+        # Calculate the corrected total sum of squares (TSS).
+        self._TSS = np.sum((y - np.mean(y))**2)       
+        # Calculate the residual sum of squares (RSS).
+        self._RSS = np.sum((y - self.predict(X))**2)
+        # Calculate the model sum of squares (MSS).
+        self._MSS = self._TSS - self._RSS
+        
+        # Estimate the sigma (standard deviation) of the response y.
+        self.sigma_hat = np.sqrt(self._RSS 
+                                 / (X_copy.shape[0] - X_copy.shape[1]))
+        
+        # Calculate the R-squared of the fit model.
+        self.R_sq = 1 - self._RSS / self._TSS
+        # Calculate the adjusted R-squares, which adjusts the R-square by 
+        # penalizing the model for having variables which don't lower the
+        # R-squared.
+        self.adj_R_sq = (1 
+                         - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
+                         /(X_copy.shape[0] - X_copy.shape[1]))
+        
+        # If the first column is all 1s for an intercept term, the degrees of
+        # freedom of the model is the number of columns - 1.
+        if sum(X_copy[:,0] == 1.) == X_copy.shape[0]:
+            self.df_model = X_copy.shape[1] - 1
+        # If there is an intercept column, the degrees of freedom of the model
+        # is the number of columns.
+        else:
+            self.df_model = X_copy.shape[1]
+        
+        # Set the degrees of freedom of the error attribute for the model.
+        self.df_residuals =  X_copy.shape[0] -  X_copy.shape[1]
+        
+        # Calculate the F-statistic for overall significance.
+        self.F_stat = (self._MSS / self.df_model)/(self._RSS 
+                                                   / self.df_residuals)
+        # Calculate P(F-statistic) for overall significance.
+        self.F_prob = 1. - f.cdf(self.F_stat, self.df_model, self.df_residuals)
+        
+        # Calculate the standard errors of the beta_hat coefficients.
+        # First calculate the pseudo-inverse of XtX forcing all values to be
+        # positive.
+        XtX = np.matmul(np.transpose(X_copy), X_copy)
+        XtX_pinv = np.absolute(np.linalg.pinv(XtX))
+        # Calculate the standard errors of the coefficients.
+        self.beta_hat_se = np.diagonal(np.sqrt(self.sigma_hat**2 * XtX_pinv))
+        
+        # Calculate the t-statitistics of the estimated coefficients.
+        self.beta_hat_t_stats = self.beta_hat / self.beta_hat_se
+        
+        # Calculate the P(|t-stats| > 0) for the coefficients.
+        self.beta_hat_prob = (1 
+                              - t.cdf(np.absolute(self.beta_hat_t_stats), 
+                                      df=self.df_residuals))*2
+        
+        return
+
 
 class OLS(LinearRegression):
     """This class is used for performing OLS regression."""
