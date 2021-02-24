@@ -149,7 +149,7 @@ class ClosedFormLinearModel(LinearModel):
         None.
 
         """
-        super(LinearModel, self).__init__(*args, **kwargs)
+        super(LinearRegression, self).__init__(*args, **kwargs)
         return
     
     def fit(self, X, y, alpha=0.0):
@@ -187,61 +187,7 @@ class ClosedFormLinearModel(LinearModel):
         self._calculate_model_stats(X, y)
         
         return
-    
-    def _fit_qr(self, X, y):
-        """Estimates the coefficients of the OLS model using QR factorization.
 
-        Parameters
-        ----------
-        X : numpy ndarray
-            A n x m matrix where the rows are observations and the columns are
-            features used for predicting y.
-        y : numpy ndarray
-            A vector (numpy ndarray) of shape (n, ) of the response variable
-            being predicted.
-
-        Returns
-        -------
-        None.
-
-        """
-        
-        # Factorize X into Q, an orthonormal matrix, and R, an upper 
-        # triangular matrix, such that X = QR.
-        Q, R = np.linalg.qr(X)
-        # Multiply the transpose of Q and y.
-        z = np.matmul(np.transpose(Q), y)
-        # Set the beta_hat attribute as the estimate of beta vector.
-        self.beta_hat = np.linalg.solve(R, z)
-        
-        return
-    
-    def _fit_pinv(self, X, y):
-        """Estimates the coefficients of the OLS model using the normal 
-        equation, but substituting the Moore-Penrose pseudo-inverse of XtX^-1 
-        instead of directly calculating XtX^-1.
-
-        Parameters
-        ----------
-        X : numpy ndarray
-            A n x m matrix where the rows are observations and the columns are
-            features used for predicting y.
-        y : numpy ndarray
-            A vector (numpy ndarray) of shape (n, ) of the response variable
-            being predicted.
-
-        Returns
-        -------
-        None.
-
-        """
-        
-        # Calculate the hat (aka projection matrix).
-        hat_matrix = np.linalg.pinv(X)
-        # Set the beta_hat attribute with the OLS estimates of beta.
-        self.beta_hat = np.matmul(hat_matrix, y)
-        
-        return 
     
     def _fit_svd(self, X, y):
         """Estimates the coefficients of the OLS model using Singular Value
@@ -290,10 +236,6 @@ class ClosedFormLinearModel(LinearModel):
     
     def _calculate_model_stats(self, X, y):
         
-        # Create a copy of X with an intercept column inserted at the 
-        # beginning if the user desired it. 
-        X_copy = self._add_intercept(X)
-        
         # Calculate the corrected total sum of squares (TSS).
         self._TSS = np.sum((y - np.mean(y))**2)       
         # Calculate the residual sum of squares (RSS).
@@ -301,52 +243,8 @@ class ClosedFormLinearModel(LinearModel):
         # Calculate the model sum of squares (MSS).
         self._MSS = self._TSS - self._RSS
         
-        # Estimate the sigma (standard deviation) of the response y.
-        self.sigma_hat = np.sqrt(self._RSS 
-                                 / (X_copy.shape[0] - X_copy.shape[1]))
-        
         # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._RSS / self._TSS
-        # Calculate the adjusted R-squares, which adjusts the R-square by 
-        # penalizing the model for having variables which don't lower the
-        # R-squared.
-        self.adj_R_sq = (1 
-                         - ((1 - self.R_sq)*(X_copy.shape[0] - 1))
-                         /(X_copy.shape[0] - X_copy.shape[1]))
-        
-        # If the first column is all 1s for an intercept term, the degrees of
-        # freedom of the model is the number of columns - 1.
-        if sum(X_copy[:,0] == 1.) == X_copy.shape[0]:
-            self.df_model = X_copy.shape[1] - 1
-        # If there is an intercept column, the degrees of freedom of the model
-        # is the number of columns.
-        else:
-            self.df_model = X_copy.shape[1]
-        
-        # Set the degrees of freedom of the error attribute for the model.
-        self.df_residuals =  X_copy.shape[0] -  X_copy.shape[1]
-        
-        # Calculate the F-statistic for overall significance.
-        self.F_stat = (self._MSS / self.df_model)/(self._RSS 
-                                                   / self.df_residuals)
-        # Calculate P(F-statistic) for overall significance.
-        self.F_prob = 1. - f.cdf(self.F_stat, self.df_model, self.df_residuals)
-        
-        # Calculate the standard errors of the beta_hat coefficients.
-        # First calculate the pseudo-inverse of XtX forcing all values to be
-        # positive.
-        XtX = np.matmul(np.transpose(X_copy), X_copy)
-        XtX_pinv = np.absolute(np.linalg.pinv(XtX))
-        # Calculate the standard errors of the coefficients.
-        self.beta_hat_se = np.diagonal(np.sqrt(self.sigma_hat**2 * XtX_pinv))
-        
-        # Calculate the t-statitistics of the estimated coefficients.
-        self.beta_hat_t_stats = self.beta_hat / self.beta_hat_se
-        
-        # Calculate the P(|t-stats| > 0) for the coefficients.
-        self.beta_hat_prob = (1 
-                              - t.cdf(np.absolute(self.beta_hat_t_stats), 
-                                      df=self.df_residuals))*2
         
         return
 
