@@ -152,7 +152,7 @@ class ClosedFormLinearModel(LinearModel):
         super(LinearModel, self).__init__(*args, **kwargs)
         return
     
-    def fit(self, X, y, alpha=0):
+    def fit(self, X, y, alpha=0.0):
         """
         This method estimates to coefficients of the OLS or ridge regression 
         model using singular value decomposition and calculates the attributes 
@@ -166,11 +166,9 @@ class ClosedFormLinearModel(LinearModel):
         y : numpy ndarray
             A vector (numpy ndarray) of shape (n, ) of the response variable
             being predicted.
-        method : str, optional
-            Decides how the OLS fit is estimated. The OLS coefficients can be
-            estimated by either using QR factorization ("qr"), the 
-            Moore-Penrose  pseudo-inverse of XtX^-1 ("moore-penrose"), or 
-            Singular Value Decomposition "svd". The default is "qr".
+        alpha : float, optional
+            The shrinkage or lambda to use for ridge regression. Will be zero
+            for OLS. The default is 0.0.
 
         Returns
         -------
@@ -182,16 +180,8 @@ class ClosedFormLinearModel(LinearModel):
         # wants one.
         X_copy = self._add_intercept(X)
         
-        # Fit the model coefficients using QR factorization if the user wants.
-        if method == "qr":
-            self._fit_qr(X_copy, y)
-        # Fit the model coefficients using the Moore-Penrose psuedo-inverse of
-        # XtX^-1 if the user wants.
-        elif method == "moore-penrose":
-            self._fit_pinv(X_copy, y)
-        # Fit the model coefficients using SVD if the user wants.
-        else:
-            self._fit_svd(X_copy, y)
+        # Estimate the model coefficients using SVD.
+        self._fit_svd(X_copy, y)
         
         # Calculate model statistics.
         self._calculate_model_stats(X, y)
