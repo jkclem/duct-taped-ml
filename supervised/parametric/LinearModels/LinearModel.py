@@ -189,8 +189,7 @@ class ClosedFormLinearModel(LinearModel):
         return
 
     
-    def _fit_svd(self, X, y):
-        
+    def _fit_svd(self, X, y):        
         """Estimates the coefficients of the OLS model using Singular Value
         Decomposition.
         
