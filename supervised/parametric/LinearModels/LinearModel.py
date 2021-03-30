@@ -285,7 +285,7 @@ class OLS(LinearRegression):
         super(OLS, self).__init__(*args, **kwargs)
         return
     
-    def fit(self, X, y, method="qr"):
+    def fit(self, X, y):
         """
         This method estimates to coefficients of the OLS model and calculates
         the attributes that describe the fit of the model.
