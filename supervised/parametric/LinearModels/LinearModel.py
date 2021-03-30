@@ -199,10 +199,9 @@ class ClosedFormLinearModel(LinearRegression):
         """Estimates the coefficients of the OLS model using Singular Value
         Decomposition.
         
-        Used the following link as a guide:
+        Used the blog post at the following link:
             
-        https://andreask.cs.illinois.edu/cs357-s15/public/demos/
-        09-svd-applications/Least%20Squares%20using%20the%20SVD.html
+        http://fa.bianp.net/blog/2011/ridge-regression-path/
 
         Parameters
         ----------
@@ -219,18 +218,13 @@ class ClosedFormLinearModel(LinearRegression):
 
         """
         
-        # Decompose X into U, sigma, and Vt
-        U, sigma, Vt = np.linalg.svd(X)
-        # Create a m x n matrix of zeros that will become the pseudo-inverse 
-        # of Sigma.
-        Sigma_pinv = np.transpose(np.zeros(X.shape))
-        # Overwrite a m x m square at the begininning of the Sigma_pinv matrix
-        # with the m x m diagonal matrix where the diagonals are the inverse 
-        # of the sigma elements.
-        Sigma_pinv[:X.shape[1],:X.shape[1]] = np.diag(1/(sigma + alpha))
-        # Set the beta_hat attribute to the estimated coefficients.
-        self.beta_hat = np.transpose(Vt).dot(Sigma_pinv).dot(
-            np.transpose(U)).dot(y)
+        # Decompose X into U, s, and Vt
+        U, s, Vt = np.linalg.svd(X, full_matrices=False)
+        
+        d = s / (s[:, np.newaxis].T ** 2 + alpha)
+        # Calculate the coefficients minimizing the MSE with a penalty of
+        # alpha on the l2 norm of the coefficients.
+        self.beta_hat =  np.dot(d * U.T.dot(y), Vt).T
         
         return
 
