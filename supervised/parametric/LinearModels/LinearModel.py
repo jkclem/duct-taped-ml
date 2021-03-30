@@ -43,7 +43,7 @@ class LinearModel():
         """
         pass
     
-    def predict(self, X):
+    def _predict(self, X):
         """This method predicts the response values of the input array, X, in 
         the scale the model is estimated in; e.g. a logistic model will return
         predictions in log-odds. The columns of X must match the number of 
@@ -127,12 +127,15 @@ class LinearRegression(LinearModel):
         # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._RSS / self._TSS
         return
+    
+    def predict(self, X):
+        return self._predict(X)
 
 class ClosedFormLinearModel(LinearRegression):
     """This is a parent class to those used for performing OLS and ridge 
     regression."""
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, add_intercept=True):
         """
         Initializes the class with a boolean indicating whether or not the
         class needs to add a column of 1s to all feature matrices to fit an
@@ -155,44 +158,10 @@ class ClosedFormLinearModel(LinearRegression):
         None.
 
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(add_intercept)
         return
     
-    def fit(self, X, y, alpha=0.0):
-        """
-        This method estimates to coefficients of the OLS or ridge regression 
-        model using singular value decomposition and calculates the attributes 
-        that describe the fit of the model.
-
-        Parameters
-        ----------
-        X : numpy ndarray
-            A n x m matrix where the rows are observations and the columns are
-            features used for predicting y.
-        y : numpy ndarray
-            A vector (numpy ndarray) of shape (n, ) of the response variable
-            being predicted.
-        alpha : float, optional
-            The shrinkage or lambda to use for ridge regression. Will be zero
-            for OLS. The default is 0.0.
-
-        Returns
-        -------
-        None.
-
-        """
-        
-        # Create a copy of X that has a column for the intercept if the user
-        # wants one.
-        X_copy = self._add_intercept(X)
-        
-        # Estimate the model coefficients using SVD.
-        self._fit_svd(X_copy, y, alpha)
-        
-        # Calculate model statistics.
-        self._calculate_model_stats(X, y)
-        
-        return
+    
 
     
     def _fit_svd(self, X, y, alpha=0.0):        
@@ -225,6 +194,8 @@ class ClosedFormLinearModel(LinearRegression):
         # Calculate the coefficients minimizing the MSE with a penalty of
         # alpha on the l2 norm of the coefficients.
         self.beta_hat =  np.dot(d * U.T.dot(y), Vt).T
+        self.beta_hat = np.dot(d*np.dot(np.transpose(U), y), Vt).reshape(1, 
+                                                                         -1)[0]
         
         return
 
@@ -232,7 +203,7 @@ class ClosedFormLinearModel(LinearRegression):
 class OLS(ClosedFormLinearModel):
     """This class is used for performing OLS regression."""
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, add_intercept=True):
         """
         Initializes the class with a boolean indicating whether or not the
         class needs to add a column of 1s to all feature matrices to fit an
@@ -255,7 +226,7 @@ class OLS(ClosedFormLinearModel):
         None.
 
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(add_intercept)
         self.df_model = None
         self.df_residuals = None
         self.F_stat = None
@@ -291,7 +262,7 @@ class OLS(ClosedFormLinearModel):
         X_copy = self._add_intercept(X)
         
         # Fit the model coefficients using SVD.
-        self._fit_svd(X_copy, y)
+        self._fit_svd(X_copy, y, alpha=0.0)
         
         # Calculate model statistics.
         self._calculate_model_stats_ols(X, y)
@@ -354,9 +325,94 @@ class OLS(ClosedFormLinearModel):
         
         return
 
+class Ridge(ClosedFormLinearModel):
+    """This class is used for performing Ridge regression."""
+    
+    def __init__(self, add_intercept=True, normalize=True):
+        """
+        Initializes the class with a boolean indicating whether or not the
+        class needs to add a column of 1s to all feature matrices to fit an
+        intercept and an empty beta_hat vector that will hold the regression
+        model's coefficients. Initialized attributes for the corrected total
+        sum of squares and residual sum of squares that will be used to 
+        calculate the R-squared and adjusted R-squared attributes.
+        
+        Parameters
+        ----------
+        add_intercept : bool, optional
+            Tells the class if it needs to add a column of 1s in the first
+            column of any data set passed to it, for fitting or prediction. If
+            the user does not want to include an intercept in the model, or 
+            has already included a column of 1s in the data set for the 
+            intercept, this should be set to False. The default is True.
 
+        Returns
+        -------
+        None.
+
+        """
+        super().__init__(add_intercept)
+        self.normalize = normalize
+        self._y_bar = None
+        self._X_bar = None
+        self._X_std = None
+        return
+    
+    def _normalize(self, X):
+        if self.normalize:
+            
+            X_copy = (X - self._X_bar) / self._X_std
+        return X_copy
         
         
+    def fit(self, X, y, alpha=0.0):
+        """
+        This method estimates to coefficients of the OLS or ridge regression 
+        model using singular value decomposition and calculates the attributes 
+        that describe the fit of the model.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+        alpha : float, optional
+            The shrinkage or lambda to use for ridge regression. Will be zero
+            for OLS. The default is 0.0.
+
+        Returns
+        -------
+        None.
+
+        """
         
+        self._y_bar = np.mean(y)
+        self._X_bar = np.mean(X, axis=0)
+        self._X_std = np.std(X, axis=0)
+        
+        # Normalize X.
+        X_copy = self._normalize(X)
+        
+        demeaned_y = y - self._y_bar
+        
+        # Estimate the model coefficients using SVD.
+        self._fit_svd(X_copy, demeaned_y, alpha)
+        
+        # Calculate model statistics.
+        self._calculate_model_stats(X, y)
+        
+        return  
+    
+    def predict(self, X):
+        # Normalize X.
+        X_copy = self._normalize(X)
+        
+        return self._y_bar + self._predict(X_copy)
+    
+    def _add_intercept(self, X):
+        return X
         
         
