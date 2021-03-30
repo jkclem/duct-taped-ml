@@ -109,8 +109,7 @@ class LinearRegression(LinearModel):
         None.
 
         """
-        self.add_intercept = add_intercept
-        self.beta_hat = None
+        super().__init__()
         self._TSS = None
         self._RSS = None
         self._MSS = None
@@ -149,7 +148,7 @@ class ClosedFormLinearModel(LinearModel):
         None.
 
         """
-        super(LinearRegression, self).__init__(*args, **kwargs)
+        super().__init__()
         return
     
     def fit(self, X, y, alpha=0.0):
@@ -244,7 +243,6 @@ class ClosedFormLinearModel(LinearModel):
         self._MSS = self._TSS - self._RSS
         # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._RSS / self._TSS
-        
         return
 
 
@@ -274,6 +272,7 @@ class OLS(LinearRegression):
         None.
 
         """
+        super().__init__()
         self.df_model = None
         self.df_residuals = None
         self.F_stat = None
@@ -282,7 +281,6 @@ class OLS(LinearRegression):
         self.beta_hat_t_stats = None
         self.adj_R_sq = None
         self.sigma_hat = None
-        super(OLS, self).__init__(*args, **kwargs)
         return
     
     def fit(self, X, y):
