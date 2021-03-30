@@ -116,12 +116,19 @@ class LinearRegression(LinearModel):
         self.R_sq = None
         return
    
-    def _calculate_R_sq(self):
-        # Define a method to calculate the R-squared of the model.
+    def _calculate_model_stats(self, X, y):
+        
+        # Calculate the corrected total sum of squares (TSS).
+        self._TSS = np.sum((y - np.mean(y))**2)       
+        # Calculate the residual sum of squares (RSS).
+        self._RSS = np.sum((y - self.predict(X))**2)
+        # Calculate the model sum of squares (MSS).
+        self._MSS = self._TSS - self._RSS
+        # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._RSS / self._TSS
         return
 
-class ClosedFormLinearModel(LinearModel):
+class ClosedFormLinearModel(LinearRegression):
     """This is a parent class to those used for performing OLS and ridge 
     regression."""
     
@@ -148,7 +155,7 @@ class ClosedFormLinearModel(LinearModel):
         None.
 
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         return
     
     def fit(self, X, y, alpha=0.0):
@@ -180,7 +187,7 @@ class ClosedFormLinearModel(LinearModel):
         X_copy = self._add_intercept(X)
         
         # Estimate the model coefficients using SVD.
-        self._fit_svd(X_copy, y)
+        self._fit_svd(X_copy, y, alpha)
         
         # Calculate model statistics.
         self._calculate_model_stats(X, y)
@@ -188,7 +195,7 @@ class ClosedFormLinearModel(LinearModel):
         return
 
     
-    def _fit_svd(self, X, y):        
+    def _fit_svd(self, X, y, alpha=0.0):        
         """Estimates the coefficients of the OLS model using Singular Value
         Decomposition.
         
@@ -214,39 +221,21 @@ class ClosedFormLinearModel(LinearModel):
         
         # Decompose X into U, sigma, and Vt
         U, sigma, Vt = np.linalg.svd(X)
-        # Create a matrix with the dimensions of X of all zeros to make into
-        # the Sigma matrix.
-        Sigma = np.zeros(X.shape)
-        # Overwrite the zeros in the top m x m square of the Sigma matrix with
-        # a m x m diagonal matrix where the sigma values are the diagonal.
-        Sigma[:X.shape[1],:X.shape[1]] = np.diag(sigma)
         # Create a m x n matrix of zeros that will become the pseudo-inverse 
         # of Sigma.
         Sigma_pinv = np.transpose(np.zeros(X.shape))
         # Overwrite a m x m square at the begininning of the Sigma_pinv matrix
         # with the m x m diagonal matrix where the diagonals are the inverse 
         # of the sigma elements.
-        Sigma_pinv[:X.shape[1],:X.shape[1]] = np.diag(1/sigma)
+        Sigma_pinv[:X.shape[1],:X.shape[1]] = np.diag(1/(sigma + alpha))
         # Set the beta_hat attribute to the estimated coefficients.
         self.beta_hat = np.transpose(Vt).dot(Sigma_pinv).dot(
             np.transpose(U)).dot(y)
         
         return
-    
-    def _calculate_model_stats(self, X, y):
-        
-        # Calculate the corrected total sum of squares (TSS).
-        self._TSS = np.sum((y - np.mean(y))**2)       
-        # Calculate the residual sum of squares (RSS).
-        self._RSS = np.sum((y - self.predict(X))**2)
-        # Calculate the model sum of squares (MSS).
-        self._MSS = self._TSS - self._RSS
-        # Calculate the R-squared of the fit model.
-        self.R_sq = 1 - self._RSS / self._TSS
-        return
 
 
-class OLS(LinearRegression):
+class OLS(ClosedFormLinearModel):
     """This class is used for performing OLS regression."""
     
     def __init__(self, *args, **kwargs):
@@ -272,7 +261,7 @@ class OLS(LinearRegression):
         None.
 
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.df_model = None
         self.df_residuals = None
         self.F_stat = None
@@ -311,129 +300,23 @@ class OLS(LinearRegression):
         self._fit_svd(X_copy, y)
         
         # Calculate model statistics.
+        self._calculate_model_stats_ols(X, y)
+        
+        return
+    
+    def _calculate_model_stats_ols(self, X, y):
+        
+        # Calculate RSS, TSS, and R-sq
         self._calculate_model_stats(X, y)
-        
-        return
-    
-    def _fit_qr(self, X, y):
-        """Estimates the coefficients of the OLS model using QR factorization.
-
-        Parameters
-        ----------
-        X : numpy ndarray
-            A n x m matrix where the rows are observations and the columns are
-            features used for predicting y.
-        y : numpy ndarray
-            A vector (numpy ndarray) of shape (n, ) of the response variable
-            being predicted.
-
-        Returns
-        -------
-        None.
-
-        """
-        
-        # Factorize X into Q, an orthonormal matrix, and R, an upper 
-        # triangular matrix, such that X = QR.
-        Q, R = np.linalg.qr(X)
-        # Multiply the transpose of Q and y.
-        z = np.matmul(np.transpose(Q), y)
-        # Set the beta_hat attribute as the estimate of beta vector.
-        self.beta_hat = np.linalg.solve(R, z)
-        
-        return
-    
-    def _fit_pinv(self, X, y):
-        """Estimates the coefficients of the OLS model using the normal 
-        equation, but substituting the Moore-Penrose pseudo-inverse of XtX^-1 
-        instead of directly calculating XtX^-1.
-
-        Parameters
-        ----------
-        X : numpy ndarray
-            A n x m matrix where the rows are observations and the columns are
-            features used for predicting y.
-        y : numpy ndarray
-            A vector (numpy ndarray) of shape (n, ) of the response variable
-            being predicted.
-
-        Returns
-        -------
-        None.
-
-        """
-        
-        # Calculate the hat (aka projection matrix).
-        hat_matrix = np.linalg.pinv(X)
-        # Set the beta_hat attribute with the OLS estimates of beta.
-        self.beta_hat = np.matmul(hat_matrix, y)
-        
-        return 
-    
-    def _fit_svd(self, X, y):
-        """Estimates the coefficients of the OLS model using Singular Value
-        Decomposition.
-        
-        Used the following link as a guide:
-            
-        https://andreask.cs.illinois.edu/cs357-s15/public/demos/
-        09-svd-applications/Least%20Squares%20using%20the%20SVD.html
-
-        Parameters
-        ----------
-        X : numpy ndarray
-            A n x m matrix where the rows are observations and the columns are
-            features used for predicting y.
-        y : numpy ndarray
-            A vector (numpy ndarray) of shape (n, ) of the response variable
-            being predicted.
-
-        Returns
-        -------
-        None.
-
-        """
-        
-        # Decompose X into U, sigma, and Vt
-        U, sigma, Vt = np.linalg.svd(X)
-        # Create a matrix with the dimensions of X of all zeros to make into
-        # the Sigma matrix.
-        Sigma = np.zeros(X.shape)
-        # Overwrite the zeros in the top m x m square of the Sigma matrix with
-        # a m x m diagonal matrix where the sigma values are the diagonal.
-        Sigma[:X.shape[1],:X.shape[1]] = np.diag(sigma)
-        # Create a m x n matrix of zeros that will become the pseudo-inverse 
-        # of Sigma.
-        Sigma_pinv = np.transpose(np.zeros(X.shape))
-        # Overwrite a m x m square at the begininning of the Sigma_pinv matrix
-        # with the m x m diagonal matrix where the diagonals are the inverse 
-        # of the sigma elements.
-        Sigma_pinv[:X.shape[1],:X.shape[1]] = np.diag(1/sigma)
-        # Set the beta_hat attribute to the estimated coefficients.
-        self.beta_hat = np.transpose(Vt).dot(Sigma_pinv).dot(
-            np.transpose(U)).dot(y)
-        
-        return
-    
-    def _calculate_model_stats(self, X, y):
         
         # Create a copy of X with an intercept column inserted at the 
         # beginning if the user desired it. 
         X_copy = self._add_intercept(X)
         
-        # Calculate the corrected total sum of squares (TSS).
-        self._TSS = np.sum((y - np.mean(y))**2)       
-        # Calculate the residual sum of squares (RSS).
-        self._RSS = np.sum((y - self.predict(X))**2)
-        # Calculate the model sum of squares (MSS).
-        self._MSS = self._TSS - self._RSS
-        
         # Estimate the sigma (standard deviation) of the response y.
         self.sigma_hat = np.sqrt(self._RSS 
                                  / (X_copy.shape[0] - X_copy.shape[1]))
         
-        # Calculate the R-squared of the fit model.
-        self.R_sq = 1 - self._RSS / self._TSS
         # Calculate the adjusted R-squares, which adjusts the R-square by 
         # penalizing the model for having variables which don't lower the
         # R-squared.
