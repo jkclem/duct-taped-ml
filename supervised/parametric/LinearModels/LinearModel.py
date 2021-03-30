@@ -390,8 +390,7 @@ class Ridge(ClosedFormLinearModel):
 
         """
         
-        assert ((type(alpha) == float) 
-                & (alpha >= 0.0)), "alpha must be a non-negative float."
+        assert alpha >= 0.0, "alpha must be non-negative"
         
         self._y_bar = np.mean(y)
         self._X_bar = np.mean(X, axis=0)
