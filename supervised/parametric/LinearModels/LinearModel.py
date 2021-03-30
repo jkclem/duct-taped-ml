@@ -242,7 +242,6 @@ class ClosedFormLinearModel(LinearModel):
         self._RSS = np.sum((y - self.predict(X))**2)
         # Calculate the model sum of squares (MSS).
         self._MSS = self._TSS - self._RSS
-        
         # Calculate the R-squared of the fit model.
         self.R_sq = 1 - self._RSS / self._TSS
         
@@ -299,12 +298,7 @@ class OLS(LinearRegression):
         y : numpy ndarray
             A vector (numpy ndarray) of shape (n, ) of the response variable
             being predicted.
-        method : str, optional
-            Decides how the OLS fit is estimated. The OLS coefficients can be
-            estimated by either using QR factorization ("qr"), the 
-            Moore-Penrose  pseudo-inverse of XtX^-1 ("moore-penrose"), or 
-            Singular Value Decomposition "svd". The default is "qr".
-
+            
         Returns
         -------
         None.
@@ -315,16 +309,8 @@ class OLS(LinearRegression):
         # wants one.
         X_copy = self._add_intercept(X)
         
-        # Fit the model coefficients using QR factorization if the user wants.
-        if method == "qr":
-            self._fit_qr(X_copy, y)
-        # Fit the model coefficients using the Moore-Penrose psuedo-inverse of
-        # XtX^-1 if the user wants.
-        elif method == "moore-penrose":
-            self._fit_pinv(X_copy, y)
-        # Fit the model coefficients using SVD if the user wants.
-        else:
-            self._fit_svd(X_copy, y)
+        # Fit the model coefficients using SVD.
+        self._fit_svd(X_copy, y)
         
         # Calculate model statistics.
         self._calculate_model_stats(X, y)
