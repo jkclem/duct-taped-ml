@@ -328,7 +328,7 @@ class OLS(ClosedFormLinearModel):
 class Ridge(ClosedFormLinearModel):
     """This class is used for performing Ridge regression."""
     
-    def __init__(self, add_intercept=True, normalize=True):
+    def __init__(self, add_intercept=True, standardize=True):
         """
         Initializes the class with a boolean indicating whether or not the
         class needs to add a column of 1s to all feature matrices to fit an
@@ -352,16 +352,17 @@ class Ridge(ClosedFormLinearModel):
 
         """
         super().__init__(add_intercept)
-        self.normalize = normalize
+        self.standardize = standardize
         self._y_bar = None
         self._X_bar = None
         self._X_std = None
         return
     
-    def _normalize(self, X):
-        if self.normalize:
-            
+    def _standardize(self, X):
+        if self.standardize:
             X_copy = (X - self._X_bar) / self._X_std
+        else:
+            X_copy = X
         return X_copy
         
         
@@ -393,10 +394,13 @@ class Ridge(ClosedFormLinearModel):
         self._X_bar = np.mean(X, axis=0)
         self._X_std = np.std(X, axis=0)
         
-        # Normalize X.
-        X_copy = self._normalize(X)
+        # Standardize X.
+        X_copy = self._standardize(X)
         
-        demeaned_y = y - self._y_bar
+        if self.add_intercept:
+            demeaned_y = y - self._y_bar
+        else: 
+            demeaned_y = y - 0
         
         # Estimate the model coefficients using SVD.
         self._fit_svd(X_copy, demeaned_y, alpha)
@@ -407,8 +411,7 @@ class Ridge(ClosedFormLinearModel):
         return  
     
     def predict(self, X):
-        # Normalize X.
-        X_copy = self._normalize(X)
+        X_copy = self._standardize(X)
         
         return self._y_bar + self._predict(X_copy)
     
