@@ -82,6 +82,11 @@ class LinearModel():
         
         return X_copy
     
+class LogisticRegression(LinearModel):
+    def __init__(self, add_intercept=True):
+        super().__init__()
+        
+    
 class LinearRegression(LinearModel):
     """This class serves as the parent class to the OLS, LAD, LASSO, Ridge, 
     and Elastic Net regression classes."""
