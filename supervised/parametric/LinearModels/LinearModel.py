@@ -7,7 +7,7 @@ Created on Thu Feb 11 18:41:49 2021
 # Import the f distribution from scipy.stats
 from scipy.stats import f, t
 import numpy as np
-
+from scipy.optimize import newton
 class LinearModel():
     """The Linear Model Class is the parent class to all linear models."""
     
@@ -109,7 +109,8 @@ class LogisticRegression(LinearModel):
             regression.
 
         """
-        
+        # Add an intercept if desired.
+        X = self._add_intercept(X)
         # Calculate the numerator of the inverse logit transformation.
         numerator = np.exp(np.matmul(X, self.beta_hat))
         # Calculate the denominator of the inverse logit transformation.
@@ -138,17 +139,25 @@ class LogisticRegression(LinearModel):
 
         Returns
         -------
-        _log_likelihood : float
+        log_likelihood : float
             The log-likelihood of the beta vector given the data.
 
         """
-        
+        # Add an intercept if desired.
+        X = self._add_intercept(X)
         # Calculate the log-likelihood of beta given the data.
-        _log_likelihood = np.sum(y*np.log(self._inv_logit(self.beta_hat, X)) 
-                                + (1-y)*np.log((1-self._inv_logit(self.beta_hat
-                                                                  ,X))))
+        log_likelihood = np.sum(y*np.log(self._inv_logit(self.beta_hat, X)) 
+                               + (1-y)*np.log((1-self._inv_logit(self.beta_hat
+                                                                 ,X))))
         
-        return _log_likelihood
+        return log_likelihood
+    
+    def fit(self, X, y):
+        # Add an intercept if desired.
+        X = self._add_intercept(X)
+        beta_start = np.repeat(0, X.shape[1])
+        
+        pass
     
     def predict_probabilities(self, X):
         """
@@ -169,17 +178,12 @@ class LogisticRegression(LinearModel):
 
         """
         
-        # Add a column of ones in the first column if this instance of the
-        # class is fit with an intercept.
-        if self._intercept_added:
-            X_new = np.append(np.ones(shape=(X.shape[0], 1)), X, 1)
-        # Do not add a column of ones if it was not added by this instance.
-        else:
-            X_new = X
+        # Add an intercept if desired.
+        X = self._add_intercept(X)
         
         # Calculate the probability of each new observation belonging to 
         # class 1.
-        predicted_probabilities = self._inv_logit(X_new)
+        predicted_probabilities = self._inv_logit(X)
             
         return predicted_probabilities
     
@@ -205,7 +209,8 @@ class LogisticRegression(LinearModel):
             DESCRIPTION.
 
         """
-
+        # Add an intercept if desired.
+        X = self._add_intercept(X)
         # Predict the probabilities of belonging to class 1.
         predicted_probabilities = self.predict_probabilities(X)
         # Set predictions to 1 or 0 based on the decision boundary.
