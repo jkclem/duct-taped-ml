@@ -157,6 +157,19 @@ class LogisticRegression(LinearModel):
         X = self._add_intercept(X)
         beta_start = np.repeat(0, X.shape[1])
         
+        def _log_likelihood_(beta):
+            # Calculate the log-likelihood of beta given the data.
+            log_likelihood = np.sum(y*np.log(self._inv_logit(beta, X)) 
+                                    + (1-y)*np.log((1-self._inv_logit(beta, 
+                                                                      X))))
+        
+            return log_likelihood
+        
+        def _log_likelihood_optimize(*args):
+            beta = np.array(*args)
+            return _log_likelihood_(beta)
+        
+        newton(_log_likelihood_optimize)
         pass
     
     def predict_probabilities(self, X):
