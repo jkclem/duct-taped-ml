@@ -312,6 +312,7 @@ class LASSO(LinearRegression):
         self._y_bar = None
         self._X_bar = None
         self._X_std = None
+        self._alpha = None
         return
     
     def _standardize(self, X):
@@ -329,11 +330,11 @@ class LASSO(LinearRegression):
         # Calculate the SSR.
         ssr = np.matmul(resids.T, resids)
         # Calculate the lasso loss.
-        lasso_loss = ssr + self.alpha * np.sum(np.abs(beta))
+        lasso_loss = ssr + self._alpha * np.sum(np.abs(beta))
         
         return lasso_loss
      
-    def _fit_numeric(self, X, y, method="BFGS", max_iter=5000):
+    def _fit_numeric(self, X, y, alpha, method, max_iter):
         
         assert ((method == "Newton-CG") 
                 | (method == "BFGS")), "Valid methods are 'Newton-CG' and 'BFGS'"
@@ -359,7 +360,7 @@ class LASSO(LinearRegression):
         
         return
         
-    def fit(self, X, y, alpha=0.0):
+    def fit(self, X, y, alpha=0.0, method="BFGS", max_iter=5000):
         """
         This method estimates to coefficients of the LASSO regression 
         model using numerical optimization and calculates the attributes 
@@ -384,6 +385,7 @@ class LASSO(LinearRegression):
         """
         
         assert alpha >= 0.0, "alpha must be non-negative"
+        self._alpha = alpha
         
         self._y_bar = np.mean(y)
         self._X_bar = np.mean(X, axis=0)
@@ -398,7 +400,7 @@ class LASSO(LinearRegression):
             demeaned_y = y - 0
         
         # Estimate the model coefficients using SVD.
-        self._fit_numeric(X_copy, demeaned_y, alpha)
+        self._fit_numeric(X_copy, demeaned_y, alpha, method, max_iter)
         
         # Calculate model statistics.
         self._calculate_model_stats(X, y)
@@ -638,6 +640,7 @@ class Ridge(ClosedFormLinearModel):
         self._y_bar = None
         self._X_bar = None
         self._X_std = None
+        self._alpha = None
         return
     
     def _standardize(self, X):
@@ -673,6 +676,7 @@ class Ridge(ClosedFormLinearModel):
         """
         
         assert alpha >= 0.0, "alpha must be non-negative"
+        self._alpha = alpha
         
         self._y_bar = np.mean(y)
         self._X_bar = np.mean(X, axis=0)
