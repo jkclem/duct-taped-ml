@@ -7,7 +7,8 @@ Created on Thu Feb 11 18:41:49 2021
 # Import the f distribution from scipy.stats
 from scipy.stats import f, t
 import numpy as np
-from scipy.optimize import newton
+from scipy.optimize import newton, minimize
+
 class LinearModel():
     """The Linear Model Class is the parent class to all linear models."""
     
@@ -279,6 +280,138 @@ class LinearRegression(LinearModel):
     
     def predict(self, X):
         return self._predict(X)
+    
+class LASSO(LinearRegression):
+    """This class is used for performing LASSO regression."""
+    
+    def __init__(self, add_intercept=True, standardize=True):
+        """
+        Initializes the class with a boolean indicating whether or not the
+        class needs to add a column of 1s to all feature matrices to fit an
+        intercept and an empty beta_hat vector that will hold the regression
+        model's coefficients. Initialized attributes for the corrected total
+        sum of squares and residual sum of squares that will be used to 
+        calculate the R-squared and adjusted R-squared attributes.
+        
+        Parameters
+        ----------
+        add_intercept : bool, optional
+            Tells the class if it needs to add a column of 1s in the first
+            column of any data set passed to it, for fitting or prediction. If
+            the user does not want to include an intercept in the model, or 
+            has already included a column of 1s in the data set for the 
+            intercept, this should be set to False. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
+        super().__init__(add_intercept)
+        self.standardize = standardize
+        self._y_bar = None
+        self._X_bar = None
+        self._X_std = None
+        return
+    
+    def _standardize(self, X):
+        if self.standardize:
+            X_copy = (X - self._X_bar) / self._X_std
+        else:
+            X_copy = X
+        return X_copy
+    
+    def _lasso_loss(self, beta, X, y):
+        # Calculate the prediction with beta.
+        y_hat = np.matmul(X, beta)
+        # Calculate the residuals
+        resids = y - y_hat
+        # Calculate the SSR.
+        ssr = np.matmul(resids.T, resids)
+        # Calculate the lasso loss.
+        lasso_loss = ssr + np.sum(np.abs(beta))
+        
+        return lasso_loss
+     
+    def _fit_numeric(self, X, y, method="BFGS", max_iter=5000):
+        
+        assert ((method == "Newton-CG") 
+                | (method == "BFGS")), "Valid methods are 'Newton-CG' and 'BFGS'"
+        assert ((type(max_iter) == int)
+                & (max_iter > 0)), "max_iter must be a postive integer"
+        
+        # Add an intercept if desired.
+        X = self._add_intercept(X)
+        
+        # Initialize a beta vector at 0.
+        beta_start = np.repeat(0, X.shape[1])
+        
+        # Perform the optimization.
+        opt_object = minimize(self._lasso_loss,
+                               beta_start,
+                               args=(X,y),
+                               method=method, 
+                               options = {"maxiter": max_iter})
+        print(opt_object["message"])
+        
+        # Set the beta_hat with the optimal result.
+        self.beta_hat = opt_object["x"]
+        
+        return
+        
+    def fit(self, X, y, alpha=0.0):
+        """
+        This method estimates to coefficients of the LASSO regression 
+        model using numerical optimization and calculates the attributes 
+        that describe the fit of the model.
+
+        Parameters
+        ----------
+        X : numpy ndarray
+            A n x m matrix where the rows are observations and the columns are
+            features used for predicting y.
+        y : numpy ndarray
+            A vector (numpy ndarray) of shape (n, ) of the response variable
+            being predicted.
+        alpha : float, optional
+            The shrinkage or lambda to use for lasso regression. Will be zero
+            for OLS. The default is 0.0.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        assert alpha >= 0.0, "alpha must be non-negative"
+        
+        self._y_bar = np.mean(y)
+        self._X_bar = np.mean(X, axis=0)
+        self._X_std = np.std(X, axis=0)
+        
+        # Standardize X.
+        X_copy = self._standardize(X)
+        
+        if self.add_intercept:
+            demeaned_y = y - self._y_bar
+        else: 
+            demeaned_y = y - 0
+        
+        # Estimate the model coefficients using SVD.
+        self._fit_numeric(X_copy, demeaned_y, alpha)
+        
+        # Calculate model statistics.
+        self._calculate_model_stats(X, y)
+        
+        return  
+    
+    def predict(self, X):
+        X_copy = self._standardize(X)
+        
+        return self._y_bar + self._predict(X_copy)
+    
+    def _add_intercept(self, X):
+        return X
 
 class ClosedFormLinearModel(LinearRegression):
     """This is a parent class to those used for performing OLS and ridge 
