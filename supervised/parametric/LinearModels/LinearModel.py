@@ -336,8 +336,8 @@ class LASSO(LinearRegression):
      
     def _fit_numeric(self, X, y, alpha, method, max_iter):
         
-        assert ((method == "Newton-CG") 
-                | (method == "BFGS")), "Valid methods are 'Newton-CG' and 'BFGS'"
+        assert ((method == "Powell") 
+                | (method == "BFGS")), "Valid methods are 'Powell' and 'BFGS'"
         assert ((type(max_iter) == int)
                 & (max_iter > 0)), "max_iter must be a postive integer"
         
