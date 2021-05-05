@@ -334,7 +334,7 @@ class LASSO(LinearRegression):
         
         return lasso_loss
      
-    def _fit_numeric(self, X, y, alpha, method, max_iter):
+    def _fit_numeric(self, X, y, alpha, method, max_iter, verbose):
         
         assert ((method == "Powell") 
                 | (method == "BFGS")), "Valid methods are 'Powell' and 'BFGS'"
@@ -353,14 +353,15 @@ class LASSO(LinearRegression):
                                args=(X,y),
                                method=method, 
                                options = {"maxiter": max_iter})
-        print(opt_object["message"])
+        if verbose:
+            print(opt_object["message"])
         
         # Set the beta_hat with the optimal result.
         self.beta_hat = opt_object["x"]
         
         return
         
-    def fit(self, X, y, alpha=0.0, method="BFGS", max_iter=5000):
+    def fit(self, X, y, alpha=0.0, method="BFGS", max_iter=5000, verbose=False):
         """
         This method estimates to coefficients of the LASSO regression 
         model using numerical optimization and calculates the attributes 
@@ -368,15 +369,18 @@ class LASSO(LinearRegression):
 
         Parameters
         ----------
-        X : numpy ndarray
-            A n x m matrix where the rows are observations and the columns are
-            features used for predicting y.
-        y : numpy ndarray
-            A vector (numpy ndarray) of shape (n, ) of the response variable
-            being predicted.
-        alpha : float, optional
-            The shrinkage or lambda to use for lasso regression. Will be zero
-            for OLS. The default is 0.0.
+        X : TYPE
+            DESCRIPTION.
+        y : TYPE
+            DESCRIPTION.
+        alpha : TYPE, optional
+            DESCRIPTION. The default is 0.0.
+        method : TYPE, optional
+            DESCRIPTION. The default is "BFGS".
+        max_iter : TYPE, optional
+            DESCRIPTION. The default is 5000.
+        verbose : TYPE, optional
+            DESCRIPTION. The default is False.
 
         Returns
         -------
@@ -400,7 +404,7 @@ class LASSO(LinearRegression):
             demeaned_y = y - 0
         
         # Estimate the model coefficients using SVD.
-        self._fit_numeric(X_copy, demeaned_y, alpha, method, max_iter)
+        self._fit_numeric(X_copy, demeaned_y, alpha, method, max_iter, verbose)
         
         # Calculate model statistics.
         self._calculate_model_stats(X, y)
