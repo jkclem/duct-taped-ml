@@ -7,7 +7,7 @@ Created on Thu Feb 11 18:41:49 2021
 # Import the f distribution from scipy.stats
 from scipy.stats import f, t
 import numpy as np
-from scipy.optimize import newton, minimize
+from scipy.optimize import minimize
 
 class LinearModel():
     """The Linear Model Class is the parent class to all linear models."""
@@ -86,92 +86,60 @@ class LinearModel():
 class LogisticRegression(LinearModel):
     def __init__(self, add_intercept=True):
         super().__init__()
+        return
     
-    def _inv_logit(self, X):
-        """
-        This method takes in a vector of coefficients for a logistic 
-        regression model and a matrix of data and returns the probabilities of
-        belonging to the class 1 by first calculating the log-odds and 
-        translating the log-odds to probabilities. It is used by the 
-        _log_likelihood and predict_probabilities methods.
+    def _sigmoid(self, beta, X):
 
-        Parameters
-        ----------
-        beta : numpy array
-            A 1-D vector of coefficients in a logistic regression model.
-        X : numpy array
-            A 2-D matrix where rows represent observations and columns 
-            represent variables.
-
-        Returns
-        -------
-        probabilities : numpy array
-            A 1-D vector of the probabilities associated from the logistic
-            regression.
-
-        """
-        # Add an intercept if desired.
-        X = self._add_intercept(X)
         # Calculate the numerator of the inverse logit transformation.
-        numerator = np.exp(np.matmul(X, self.beta_hat))
+        numerator = 1
         # Calculate the denominator of the inverse logit transformation.
-        denominator = 1 + np.exp(np.matmul(X, self.beta_hat))
-        # Calculate the probabilities.
-        probabilities =  numerator / denominator 
+        denominator = 1 + np.exp(-np.matmul(X, beta))
         
-        return probabilities
+        return numerator/denominator
+
+    def _log_likelihood(self, beta, X, y):
     
-    def _log_likelihood(self, y, X):
-        """
-        Overwrites the _log_likelihood method inherited from the RegressorMCMC
-        class to calculate the log-likelihood of the logistic regression
-        coefficients given binomially-distributed data. It is used in the
-        model fitting process.
-
-        Parameters
-        ----------
-        y : numpy array
-            A 1-D vector of 0s and 1s representing the two classes.
-        X : numpy array
-            A 2-D matrix where rows represent observations and columns 
-            represent variables.
-        beta : numpy array
-            A 1-D vector of coefficients in a logistic regression model.
-
-        Returns
-        -------
-        log_likelihood : float
-            The log-likelihood of the beta vector given the data.
-
-        """
-        # Add an intercept if desired.
-        X = self._add_intercept(X)
+        p_hat = self._sigmoid(beta, X)
+    
         # Calculate the log-likelihood of beta given the data.
-        log_likelihood = np.sum(y*np.log(self._inv_logit(self.beta_hat, X)) 
-                               + (1-y)*np.log((1-self._inv_logit(self.beta_hat
-                                                                 ,X))))
+        log_likelihood = np.sum(y*np.log(p_hat)
+                                + (1-y)*(1-np.log(p_hat)))
         
         return log_likelihood
+        
+    def _neg_log_likelihood(self, beta, X, y):
+        return -self._log_likelihood(beta, X, y)
+
+    def _gradient(self, beta, X, y):
+        p_hat = self._sigmoid(beta, X)
+        return np.dot(X.T, (p_hat-y))
     
-    def fit(self, X, y):
+    def fit(self, X, y, method="BFGS", max_iter=5000):
+        
+        assert ((method == "Newton-CG") 
+                | (method == "BFGS")), "Valid methods are 'Newton-CG' and 'BFGS'"
+        assert ((type(max_iter) == int)
+                & (max_iter > 0)), "max_iter must be a postive integer"
+        
         # Add an intercept if desired.
         X = self._add_intercept(X)
+        
+        # Initialize a beta vector at 0.
         beta_start = np.repeat(0, X.shape[1])
         
-        def _log_likelihood_(beta):
-            # Calculate the log-likelihood of beta given the data.
-            log_likelihood = np.sum(y*np.log(self._inv_logit(beta, X)) 
-                                    + (1-y)*np.log((1-self._inv_logit(beta, 
-                                                                      X))))
+        # Perform the optimization.
+        opt_object = minimize(self._neg_log_likelihood,
+                               beta_start,
+                               args=(X,y),
+                               jac=self._gradient,
+                               method=method, 
+                               options = {"maxiter": max_iter})
+        print(opt_object["message"])
         
-            return log_likelihood
+        # Set the beta_hat with the optimal result.
+        self.beta_hat = opt_object["x"]
         
-        def _log_likelihood_optimize(*args):
-            beta = np.array(*args)
-            return _log_likelihood_(beta)
-        
-        newton(_log_likelihood_optimize)
-        pass
+        return
     
     def predict_probabilities(self, X):
         """
@@ -197,7 +165,7 @@ class LogisticRegression(LinearModel):
         
         # Calculate the probability of each new observation belonging to 
         # class 1.
-        predicted_probabilities = self._inv_logit(X)
+        predicted_probabilities = self._sigmoid(self.beta_hat, X)
             
         return predicted_probabilities
     
@@ -220,7 +188,7 @@ class LogisticRegression(LinearModel):
         Returns
         -------
         predicted_classes : numpy array
-            DESCRIPTION.
+            The predicted class.
 
         """
         # Add an intercept if desired.
