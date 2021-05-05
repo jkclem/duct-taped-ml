@@ -329,7 +329,7 @@ class LASSO(LinearRegression):
         # Calculate the SSR.
         ssr = np.matmul(resids.T, resids)
         # Calculate the lasso loss.
-        lasso_loss = ssr + np.sum(np.abs(beta))
+        lasso_loss = ssr + self.alpha * np.sum(np.abs(beta))
         
         return lasso_loss
      
